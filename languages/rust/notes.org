@@ -1,0 +1,88 @@
+* What is Awesome
+** Immutable per default
+** Ownership
+- To manage heap allocation
+- Fee space when variable goes out of scope (Reference Aquisition Is Initialization:  binds the life cycle of a resource that must be acquired before use to the lifetime of an object)
+- Move per default for values (owners), otherwise use reference (borrow)
+- Either one mutable reference a variable  at a time or as many immutable references
+** Lifetime explicit
+- No dangling references
+- Validate references with lifetimes
+** Error Handling
+- Recoverable vs Unrecoverable Errors
+- Result and Option type
+- Propagating Errors
+** Iterators (probably similar to ranges-lib in c++)
+
+* Documentation
+- Lines start with ~///~
+- General introduction to a module starts with ~//!~
+
+* Data
+** Ownership
+- Borrow with reference
+- Automatic move if you don't give a reference
+- Ownership is orthogonal to mutability
+
+** Datatypes
+- One enum can have several different data types inside
+- Can use ~.err()~ and ~.ok()~ for Option or Result
+- Box Type is just a Smart Pointer to Heap Allocated Memory
+- Concept of Higher Order Types exist (similar to Higher Order Functions) - but not yet in Rust
+  Types of Types
+
+* Behavior
+** Functions
+- Are also types
+- Closures capture the environment, this environment is still there if used at another place
+- Can give function to function
+  #+begin_src rust
+    
+    pub fn apply_function<F>(a_function:F, number: i64) -> i64
+    where
+        F: Fn(i64) -> i64;
+    
+  #+end_src
+-  Return function with Box (otherwise fight with lifetime and ownership)
+  #+begin_src rust
+    
+    fn get_a_closure_with_capture() -> Box<Fn(i64) -> f64> {
+        let x = 14.0;
+        let do_with_captured_x = move |n| n * x;
+        Box::new(do_with_captured_x)
+    }
+    
+    fn get_function() -> Box<Fn(i64) -> f64> {
+        Box::new(|n| n * 2);
+    }
+    
+    fn get_closure() -> Box<Fn(i64) -> f64> {
+        fn double(n: i32) -> i32 {
+            n * 2
+        };
+        Box::new(double);
+    }
+    
+  #+end_src
+
+** Traits
+Interfaces with default implementations
+
+* Modules
+Unlike in many languages, use declarations in Rust do not declare linkage dependency with external crates
+
+* Tests
+#+begin_src rust
+  
+  #[test]
+  #[should_panic(expected = "Wuah")]
+  fn test() {
+      panic!("Wuah");
+  }
+  
+#+end_src
+
+* Macros
+- Order is important
+- Namespace convention is different, they are always in the head of a module
+- First code is complated to syntax tree, then macros are applied. This makes macros in rust saver to use than in c(++) where macros are just text replacements up front

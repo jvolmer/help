@@ -1,0 +1,11 @@
+# show possible formats for download
+youtube-dl -F "<path>"
+
+# choose format for download (nr from -F command)
+youtube-dl -f <nr> "<path>"
+
+# upgrade version
+sudo -H pip3 install --upgrade youtube-dl
+
+# download full teachable course (save cookies with cookies.txt firefox plugin from website when logged in)
+youtube-dl --cookies cookies.txt -o "./%(chapter_number)s-%(chapter)s/%(autonumber)03d-%(title)s.%(ext)s" <URL-of-the-course-platform>/courses/enrolled/<some-number>

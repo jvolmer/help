@@ -1,0 +1,7 @@
+frame: the full application
+menu bar: bar with menu items (e.g. File, Edit, ...)
+tool bar: bar with tool symbols (e.g. for new, open, save, ...)
+window: shows content of one buffer
+fringe: left side bar of the window
+mode line: below window, shows information about current buffer in window e.g. cursor position
+echo area: bottom of frame: used for commands

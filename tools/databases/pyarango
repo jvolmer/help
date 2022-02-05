@@ -1,0 +1,66 @@
+from pyArango.connection import *
+conn = Connection(username="root", password="root_passwd")
+
+# create database
+db = conn.createDatabase(name="school")
+
+# show databases
+conn.databases
+
+# open database
+db = conn["school"]
+
+# create collection and show it
+studentsCollection = db.createCollection(name="Students")
+db["Students"]
+
+# create document
+doc1 = studentsCollection.createDocument()
+
+# fill document and save it
+doc1["name"] = "John Smith"
+doc1.save()
+
+# choose key for document
+doc1._key = "johnsmith"
+
+# save documents
+>>> students = [('Oscar', 'Wilde', 3.5), ('Thomas', 'Hobbes', 3.2), 
+... ('Mark', 'Twain', 3.0), ('Kate', 'Chopin', 3.8), ('Fyodor', 'Dostoevsky', 3.1), 
+... ('Jane', 'Austen',3.4), ('Mary', 'Wollstonecraft', 3.7), ('Percy', 'Shelley', 3.5), 
+... ('William', 'Faulkner', 3.8), ('Charlotte', 'Bronte', 3.0)]
+>>> for (first, last, gpa) in students:
+...    doc = studentsCollection.createDocument()
+...    doc['name'] = "%s %s" % (first, last)
+...    doc['gpa'] = gpa 
+...    doc['year'] = 2017
+...    doc._key = ''.join([first, last]).lower() 
+...    doc.save()
+
+
+# read documents
+>>> def report_gpa(document):
+...    print("Student: %s" % document['name'])
+...    print("GPA:     %s" % document['gpa'])
+>>> kate = studentsCollection['katechopin']
+>>> report_gpa(kate)
+Student: Kate Chopin
+GPA:     3.8
+
+# fetch all documents from collection
+students = studentsCollection.fetchAll()
+
+# removing document
+studentsCollection["thomashobbes"].delete()
+
+# AQL query
+aql = "FOR x IN Students RETURN x._key"
+queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100)
+
+# insert document via AQL
+doc = {'_key': 'denisdiderot', 'name': 'Denis Diderot', 'gpa': 3.7}
+bind = {"doc": doc}
+aql = "INSERT @doc INTO Students LET newDoc = NEW RETURN newDoc"
+# let and return to give newest document as output of query
+queryResult = db.AQLQuery(aql, bindVars=bind)
+queryResult[0]

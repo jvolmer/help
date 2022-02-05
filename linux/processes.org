@@ -1,0 +1,70 @@
+* Process management
+
+Kill commands by name
+#+begin_src shell
+  pkill <name>
+  killall <name>
+#+end_src
+
+Get process ids for search term
+#+begin_src shell
+  pgrep <term>
+#+end_src
+
+Show all processes
+#+begin_src shell
+  ps -A | less
+#+end_src
+
+* Services
+process that runs in the background
+
+https://www.digitalocean.com/community/tutorials/how-to-configure-a-linux-service-to-start-automatically-after-a-crash-or-reboot-part-1-practical-examples
+
+** Show
+#+begin_src shell
+  
+  // more detailed
+  sudo systemctl list-unit-files --type service --all
+  
+  // for one specific service
+  sudo systemctl status <service>.serice
+  
+#+end_src
+
+Alternative (but possibly older): =service --status-all=
+
+** Start/Stop
+
+#+begin_src shell
+  
+  sudo systemctl start mysqld.service
+  
+#+end_src
+
+** Autostart
+Disable a service to start after booting (same for enable)
+#+begin_src shell
+  
+  sudo systemctl disable <service>.service
+    
+#+end_src
+Remove symbolic link from =/etc/systemd/system/multi-user.target.wants/=)
+
+Possible alternative: =sudo update-rc.d <service> disable=
+
+** Change configuration
+Specific file in
+=/etc/systemd/system/multi-user.target.wants/=
+includes configuration of this service (e.g. whether it should restart)
+
+** Reload
+E.g. if you changed config in a service file (e.g. in =/etc/systemd/system/multi-user.target.wants/=)
+
+#+begin_src shell
+  
+  sudo systemctl daemon-reload
+  sudo systemctl restart <service>.service
+  
+#+end_src
+

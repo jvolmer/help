@@ -1,0 +1,317 @@
+#+TITLE: Tobis C++ Codingsession
+
+[[https://godbolt.org/][C++ Compilers in Web]]
+
+* Iterators and Auto
+
+Tranditional for-loops are not cool, use iterators if you can, e.g.
+
+#+begin_src cpp
+  
+  for (std::vector<std::string>::const_iterator it = vec.cbegin(); it != vec.end(); ++it) {
+    std::cout << *it;
+   }
+#+end_src
+
+In the loop, ~it~ is an iterator, but can be used like a pointer.
+Here, ~auto~ would be very helpful.
+
+Or even better, use a range
+
+#+begin_src cpp
+  
+  for (auto it : vec) {
+    std::count << it;
+   }
+#+end_src
+
+This one copies, use ~for (auto& it : vec)~ for looping over references
+
+Auto
+
+#+begin_src cpp
+  
+  // both times t is a pointer
+  auto t = new std::vector<int>({3, 4, 5});
+  auto* t = new std::vector<int>({3, 4, 5});
+  
+#+end_src
+
+* Help
+
+Helpful compiler flags:
+
+- -Wall -O3 -std=c++17
+- -fsanitize=address // to see what is happening
+- -ggdb // more infos
+
+  Print out your type with
+
+#+begin_src cpp
+  template <typename T>
+  void show();
+  
+  // ...
+  show<TYPE>();
+  #+end_src
+
+Shows error with TYPE;
+
+* Types
+
+** Assert
+
+#+begin_src cpp
+  
+  static_assert(std::is_same_v<EXPECTED_TYPE, REAL_TYPE>);
+
+  #+end_src
+
+** Use type from a var
+
+#+begin_src cpp
+  
+  decltype(foo); // get type
+  std::invoke_result_t<decltype(FUNCTIONNAME), FUNCTIONARGS...> // get return type
+  
+#+end_src
+
+* Function signature
+
+These two signatures are equivalent
+
+#+begin_src cpp
+  
+  std::string fun(int);
+  
+  auto fun(int) -> std::string;
+
+  #+end_src
+
+
+#+begin_src cpp
+  
+  struct Vec {
+    int const* data() const;
+    int* data() &&;               // && says what 'this' is
+  };
+  
+#+end_src
+
+Function data will be calles on an rvalue, "4".data()
+
+#+begin_src cpp
+  
+  #include <iostream>
+  
+  struct test{
+    void f() &{ std::cout << "lvalue object\n"; }
+    void f() &&{ std::cout << "rvalue object\n"; }
+  };
+  
+  int main(){
+    test t;
+    t.f(); // lvalue
+    test().f(); // rvalue
+  }
+  
+  $ clang++ -std=c++0x -stdlib=libc++ -Wall -pedantic t.cpp
+  $ ./a.out
+  lvalue object
+  rvalue object
+#+end_src
+
+* Lamdas
+
+Is the same as closures in Rust, but here you specify what is captured and used from the surrounding (in Rust it can access any variable that is in enclosing scope by default)
+
+#+begin_src cpp
+  
+  auto lambda = [/* captures */](/*args*/){/*code*/};
+    
+#+end_src
+
+Example
+
+#+begin_src cpp
+  
+  int capture = 0;
+  
+  auto lambda = [_capture = capture](int parameter){
+             return _capture + parameter;
+           };
+  
+  std::cout << lambda(4);
+  
+  capture += 4; // changes output if [&_capture = capture] is used, currently capture is copied to lambda expression
+  
+#+end_src
+
+Lambda are very similar to classes, the above lambda expression is equvalent to
+
+#+begin_src cpp
+  
+  struct Lambda {
+    Lambda(int& capture) : _capture(capture);
+    auto operator()(int parameter) -> int {return _capture + parameter; }
+    private int& _capture;
+  };
+  
+  auto lambda_from_class = Lambda(1);
+  std::cout << lambda_from_class(4);
+  
+#+end_src
+
+You can even derive from lambdas
+
+#+begin_src cpp
+  
+  struct L3: decltype(lambda) {
+    L3() = default;
+  };
+#+end_src
+
+Better readability if you directly want to invoke lambda (otherwise there will be ~()~ behind lambda-expression, which is easy to miss.
+
+#+begin_src cpp
+  
+  auto const val = std::invoke([&] {
+                                 return 1;
+                               });
+#+end_src
+
+Here, everything in the scope is captured with ~[&]~.
+
+* r-values (prvalue = pure rvalue)
+
+** Usage
+
+#+begin_src cpp
+    
+    // some function
+    std::vector<std::string> fun();
+    
+    // auto& v2 = fun(); // error: non-const lvalue reference
+    vec = fun();  // fun() is an rvalue
+    
+    op(fun()) // uses rvalue reference
+    auto vec2 = fun();
+    op(vec2); // uses lvalue reference
+        
+#+end_src
+
+If for some reason it looks like an lvalue, it is an lvalue.
+
+** Constructor and assignment definition
+
+If you specify one constructor, then you want to specify the others as well
+
+#+begin_src cpp
+  
+  class C {
+    public:
+    C() = default;
+    C(C const&) = default; // copy constructor
+    C(C&&) = default; // move constructor
+    auto operator=(C const& other) -> C& = default; // copy assignment
+    auto operator=(C&& other) -> C& = default; // move assignment
+  
+    // best practice: define move operators with noexcept:
+    C(C&& other) noexcept;
+    auto operator=(C&& other) noexecpt -> C&;
+  };
+  
+  // Equivalent
+  C c("hello");
+  auto c = C("hello"); // equvalent if assignemnt operator exists (is not deleted)
+  
+#+end_src
+
+** Effective usage of ~std::move~
+
+#+begin_src cpp
+  
+  struct X {
+    // best way to write a constructor for both r- and l-value reference
+    X(std::vector<int> arg) : _data(std::move(arg)) {}
+   // also use this method for a setter
+  
+  
+    // move optimization (but becomes cumbersome for more than one for construcotr)
+    X(std::vector<int> const &arg) : _data(arg) {} // dont move
+    X(std::vecotr<int>&& arg : _data(std::move(g))) {}
+  
+    std::vector<int> _data;
+  };
+  
+  auto v = std::vector<int>{};
+  auto x1 = X(v);    // copy of v as arg, moved into data
+
+    
+#+end_src
+
+What happens to moved object (here ~v~) is dependent on what move did. Should be: Object should have a valid state but it is not clear what is inside it.
+
+#+begin_src cpp
+  
+  // equivalent I DONT UNDERSTAND THAT
+  op(std::move(vec2))
+  op(static_cast<decltype(vec2)>(vec2))
+  
+#+end_src
+
+* Universal forwarding: Universal / Forwarding reference
+
+#+begin_src cpp
+  
+  template <typename T>
+  C createX(T&& x) {  // is universal reference, no rvalue ref, because from template -> use reference collapsing
+    return C(std::forward<T>(x)); // x lvalue or rvalue: C should always be called with what we give in
+  }
+  
+  auto c4 = createC<const char*>("hello"); // 
+  auto c5 = createC<C>(c);
+  auto c6 = createC<C&&>(std::move(c));
+  
+  // auto&& also does reference collapsing
+  auto& x = fun(); // x invalid if f returns temporary
+  auto&& x = createC(c); // extends lifetime of temporary
+  
+  foo(std::forward<decltype(x)>(x)); // does always correct thing: if fun() returns temp: moves, non-temp: no-move
+  auto const& = fun(); //extends lifetime of temporary
+#+end_src
+
+Reference collapsing:
+&& & -> &
+&   && -> &
+&  & -> &
+&& && -> &&
+
+* Variant
+
+Is similar to union but knows what specific type a variable has
+
+#+begin_src cpp
+  
+  std::variant<int, float> inOrFloat {0.0f};
+  int x = rounded(intOrFloat); // gives it back if int, and rounded float if float
+  
+#+end_src
+
+Usage of lambda inheritance
+#+begin_src cpp
+  
+  // overload includes the operator () for all types that come in
+  template<class ... Ts> struc overload : Ts ... { using Ts::operator() ...; };
+  // you can define the template types in a constructor list
+  template<class ... Ts> overload(Ts ...) -> overload<Ts ...>;
+  
+  std::variant<int, float> intOrFloat {0.0f};
+  
+   // uses () operator depending on type of intOrFloat
+  std::invoke(ovverload {
+      []...
+      []...
+    }, intOrFloat);
+  
+#+end_src

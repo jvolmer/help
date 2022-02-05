@@ -1,0 +1,18 @@
+#+TITLE: Links
+
+* Programming
+
+# How to Have Polymorphism Without a Heap
+https://barrgroup.com/embedded-systems/how-to/polymorphism-no-heap-memory
+
+* Communication
+
+# Serial communication via bash (using stty)
+http://arahna.de/arduino-command-line/
+
+* Boards
+
+# ESP32 TTGO dev board with OLED Display
+
+# STM32 Blue Pill mit ARM Cortex M3
+www.heise.de/developer/artikel/Keine-bittere-Pille-die-Blue-Pill-mit-ARM-Cortex-M3-4009580.html

@@ -1,0 +1,16 @@
+# Cargo
+
+## Create new project
+
+// Create new directory with project inside
+cargo new <project_name>
+
+// build project
+cargo build
+cargo build --release //with optimizations
+
+// build and run
+cargo run
+
+// make sure that it compiles without producing executable
+cargo check

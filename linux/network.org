@@ -1,0 +1,43 @@
+#+TITLE: Network
+
+* Datatransfer
+
+Download textfile from internet
+#+begin_src shell
+  wget <link>
+#+end_src
+
+Transfer data from url
+#+begin_src shell
+  curl <url>
+#+end_src
+| -i           | Include http response header in output            |
+| -X <command> | Set request method (default for http: GET)        |
+| -H <header>  | Add http header                                   |
+| -d '{...}'   | Add data in http POST request                     |
+| -O           | Write output to local file                        |
+| -L           | Redo if page has been moved to different location |
+
+Send mail
+#+begin_src shell
+  mail <address>
+#+end_src
+| -s <subject> | Add subject | 
+
+* Information
+
+** Show ports of services
+#+begin_src shell
+  
+  netstat -tulpn
+  
+#+end_src
+ =-l= prints all listening sockets
+ =-t= displays all TCP connections
+ =-u= shows all UDP connections
+ =-n= prints numeric port numbers (instead of application names)
+ =-p= shows application name
+
+** Sniff data from connection
+that is received on <port>
+=tcpdump port <port> –w dump.txt=

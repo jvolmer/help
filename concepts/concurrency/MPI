@@ -1,0 +1,220 @@
+# files to include: #include <mpi.h>
+
+# initialize MPI environment
+MPI_Init(int* argc, char*** argv);
+* MPI_Init(NULL, NULL);
+
+# size of communicator - number of ranks
+MPI_Comm_size(MPI_Comm communicator, int* size)
+* int world_size;
+* MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+# MPI_COMM_WORLD: is communicator of all processes in the job and is constructed automatically
+
+# rank of process
+MPI_Comm_rank(MPI_Comm communicator, int* rank)
+* int world_rank;
+* MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+# name of processor
+MPI_Get_processor_name(char* name, int* name_length)
+* char processor_name[MPI_MAX_PROCESSOR_NAME];
+* int name_len;
+* MPI_Get_processor_name(processor_name, &name_len);
+
+# clean up MPI environment
+MPI_Finalize()
+
+# sending
+MPI_Send(
+    void* data,
+    int count,                  # sents exact count of elements
+    MPI_Datatype datatype,
+    int destination,
+    int tag,
+    MPI_Comm communicator)
+
+# receiving
+MPI_Recv(
+    void* data,
+    int count,                  # receives at most count of elements
+    MPI_Datatype datatype,
+    int source,
+    int tag,
+    MPI_Comm communicator,
+    MPI_Status* status)
+
+# e. g.
+if (world_rank == 0) {
+    number = -1;
+    MPI_Send(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+} else if (world_rank == 1) {
+    MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD,
+             MPI_STATUS_IGNORE);
+
+# additional info about receive function with status
+MPI_Status status;
+MPI_Recv(numbers, MAX_NUMBERS, MPI_INT, 0, 0, MPI_COMM_WORLD,
+             &status);
+status.MPI_SOURCE                                  # rank of sender
+status.MPI_TAG                                     # tag of message
+MPI_Get_count(                                     #    to determine the actual receive amount
+    MPI_Status* status,
+    MPI_Datatype datatype,
+    int* count)
+* MPI_Get_count(&status, MPI_INT, &number_amount);
+number_amount                                      # length of message
+
+# probe the received message - does everyting as MPI_Recv but receiving
+MPI_Probe(
+    int source,
+    int tag,
+    MPI_Comm comm,
+    MPI_Status* status)
+* MPI_Probe(0, 0, MPI_COMM_WORLD, &status);
+* MPI_Get_count(&status, MPI_INT, &number_amount);
+* int* number_buf = (int*)malloc(sizeof(int) * number_amount);
+* MPI_Recv(number_buf, number_amount, MPI_INT, 0, 0,
+             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+### deadlock “refers to a specific condition when two or more processes are each waiting for the other to release a resource, or more than two processes are waiting for resources in a circular chain.”
+# Since we are only focusing on MPI_Send and MPI_Recv in this lesson, the best way to avoid the possible sending and receiving deadlock is to order the messaging such that sends will have matching receives and vice versa. One easy way to do this is to change our loop around such that even-numbered processes send outgoing walkers before receiving walkers and odd-numbered processes do the opposite.
+
+### collective communication
+
+# barrier, no processes in communicator can pass barrier until all of the call the function
+# to synchronize program
+MPI_Barrier(MPI_Comm communicator)
+
+# broadcasting: sends the smae peice of data to all processes (using a tree-based communication algorithm)
+MPI_Bcast(
+    void* data,
+    int count,
+    MPI_Datatype datatype,
+    int root,
+    MPI_Comm communicator)
+# for root and receiver processes
+
+# timing: returns floating-point number of seconds since a set time in the past
+MPI_Wtime()
+
+# scatter: sends chunks of an array to different processes (copying first chunk to root process)
+MPI_Scatter(
+    void* send_data,             # array of cdata that resides on root process
+    int send_count,              # how many elements of send_datatype will be sent to each process
+    MPI_Datatype send_datatype,  # datatype that is send to each process
+    void* recv_data,             # receiving data buffer
+    int recv_count,              # numer of elements in recv_data
+    MPI_Datatype recv_datatype,  # datatypes in recv_data
+    int root,                    # root process rank
+    MPI_Comm communicator)       # communicator
+
+# gathering: takes elements from many processes and gathers them to one single process
+# elements are ordered by rank of the process from which they were received
+MPI_Gather(
+    void* send_data,
+    int send_count,
+    MPI_Datatype send_datatype,
+    void* recv_data,
+    int recv_count,              # counts of elements received per process
+    MPI_Datatype recv_datatype,
+    int root,
+    MPI_Comm communicator)
+# only root process needs to have a valid receive buffer, all other processes can pass NULL to recv_data
+
+# allgather: gather all elements to all processes (gather, followed by broadcast)
+MPI_Allgather(
+    void* send_data,
+    int send_count,
+    MPI_Datatype send_datatype,
+    void* recv_data,
+    int recv_count,
+    MPI_Datatype recv_datatype,
+    MPI_Comm communicator)
+
+# get datatype size (e.g. for using malloc afterwards)
+MPI_Type_size(datatype, &datatype_size)
+
+# reduce an array of input elements on each process to a smaller array of output elements in root process
+# reduction happends on a per-element basis
+MPI_Reduce(
+    void* send_data,       # array of elements of type datatype
+    void* recv_data,       # only relevant for root process
+    int count,             # number of elements in recv_data
+    MPI_Datatype datatype,
+    MPI_Op op,             # operation to be applied
+    int root,
+    MPI_Comm communicator)
+
+# operations:
+MPI_MAX - Returns the maximum element.
+MPI_MIN - Returns the minimum element.
+MPI_SUM - Sums the elements.
+MPI_PROD - Multiplies all elements.
+MPI_LAND - Performs a logical and across the elements.
+MPI_LOR - Performs a logical or across the elements.
+MPI_BAND - Performs a bitwise and across the bits of the elements.
+MPI_BOR - Performs a bitwise or across the bits of the elements.
+MPI_MAXLOC - Returns the maximum value and the rank of the process that owns it.
+MPI_MINLOC - Returns the minimum value and the rank of the process that owns it.
+
+# gather and distribute result back to all processes
+MPI_Allreduce(
+    void* send_data,
+    void* recv_data,
+    int count,
+    MPI_Datatype datatype,
+    MPI_Op op,
+    MPI_Comm communicator)
+
+#### Communicators
+
+# split communicator into sub-communicators based on color and key input values
+# new communicator is created additionally to original one
+MPI_Comm_split(
+	MPI_Comm comm,
+	int color,           # all processes with same color are assigned to same communicator (MPI_UNDEFINED is not included in any)
+	int key,             # determines rank within each new communicator (smallest key is rank 0, tie: orginal rank determines rank)
+	MPI_Comm* newcomm)
+* MPI_Comm row_comm;
+* MPI_Comm_split(MPI_COMM_WORLD, color, world_rank, &row_comm);
+* MPI_Comm_free(&row_comm);
+
+# create dublicate of communicator
+MPI_Comm_dup
+
+# get the group of processes in a communicator
+# groups work same way as communicator objects except for communication with other ranks
+# additional to groups: use it to construct new groups locally (does not use any communication)
+# combining groups works like combining sets
+MPI_Comm_group(
+	MPI_Comm comm,
+	MPI_Group* group)
+
+# unions two groups
+MPI_Group_union(
+	MPI_Group group1,
+	MPI_Group group2,
+	MPI_Group* newgroup)
+
+# intersect groups
+MPI_Group_intersection(
+	MPI_Group group1,
+	MPI_Group group2,
+	MPI_Group* newgroup)
+
+# other operations: compare, subtract, exclude specific ranks, use group to translate ranks of one groups to another, ...
+
+# create new communicator that has same processes as group
+MPI_Comm_create_group(
+	MPI_Comm comm,
+	MPI_Group group,
+	int tag,
+	MPI_Comm* newcomm)
+)
+
+# pick specific ranks in a group and construct new groups containing them
+MPI_Group_incl(
+	MPI_Group group,
+	int n,
+	const int ranks[],
+	MPI_Group* newgroup)

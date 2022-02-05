@@ -1,0 +1,92 @@
+* Files
+
+** Find file (=find=)
+#+begin_src shell
+  find <path> -name <name/regex>
+#+end_src
+
+Delete files
+#+begin_src shell
+  find <path> -name <name/regex> -delete
+#+end_src
+
+Find all files in <path> that were changed in last 10 days and are not hidden
+#+begin_src shell
+  find <path> -type f ! -path "./.*" -mtime -30 -exec ls -l {} \;
+#+end_src
+
+** Rename files (=rename=)
+#+begin_src shell
+  rename <old> <new> <fileregex>
+  rename 's/<old>/<new>/g' <fileregex>
+#+end_src
+e.g. <fileregex> = =*.tx=
+
+| -n | Just show future renames, don't execute it |
+
+** Compression
+
+Untar .tgz.gz files
+#+begin_src shell
+  tar zxvf <file>
+#+end_src
+| z | Uncompres with gzip command (for archives with .gz) |
+| x | Extract to disc from archve                         |
+| v | Show progress and filenames while extracting        |
+| f | read archive from specified <file>                  |
+
+Tar folder
+#+begin_src shell
+  tar czf <Name>.tar.gz <FolderName>
+#+end_src
+
+** Quota
+Show quota of all files in this directory and all subdirectories
+#+begin_src shell
+  du
+#+end_src
+| -h                  | Human readable format (kB and MB instead of just bytes) |
+| -s                  | Sum                                                     |
+| -s <pattern>        | Sum patterns, e.g. */ gives only dir in this dir        |
+| --exclude=<pattern> | Exclude files                                           |
+
+** Permissions
+Gives permissions for files
+#+begin_src shell
+  chmod <group>[+-=]<permission> <file>
+#+end_src
+# Usergroups
+u	user (owner of file)
+g	group (member of group this file belongs to)
+o	others (not u or g)
+a	all
+# Action
++ add
+- remove
+= set
+# Permission
+r read
+w write
+x execute
+
+Short form using ocal representation
+#+begin_src shell
+  chmod <u><g><o> <file>
+#+end_src
+# Permission identifiers
+| Binary | Octal | Permission |
+|    000 |     0 | ---        |
+|    001 |     1 | -x-        |
+|    010 |     2 | -w-        |
+|    011 |     3 | -wx        |
+|    100 |     4 | r--        |
+|    101 |     5 | r-x        |
+|    110 |     6 | rw-        |
+|    111 |     7 | rwx        |
+
+** Symbolic links
+Create symbolic link for files or directories
+#+begin_src shell
+  ln -sf <original> <yours>
+#+end_src
+

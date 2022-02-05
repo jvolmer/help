@@ -1,0 +1,5 @@
+# find out your activation bytes / auth code with https://github.com/inAudible-NG/audible-activator.git
+./audible-activator.py
+
+# convert with https://github.com/KrumpetPirate/AAXtoMP3.git
+./AAXtoMP3 --authcode <authocode> <file>

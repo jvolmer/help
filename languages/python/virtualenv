@@ -1,0 +1,12 @@
+# create a clean copy of python here with name <bla>
+virtualenv <bla>
+# add --no-site-packages if you want to isolate your environment from the main site packages directory
+
+# activate environment
+source <bla>/bin/activate
+
+# exit environment
+deactivate
+
+# install packages
+pip install ...

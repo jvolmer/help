@@ -1,0 +1,18 @@
+# display type of file
+file <filename>
+
+# list symbol table of file
+nm <filename>
+## infos: second column T = defined function, U = undefined function should be resolved by linker
+
+# displays a list of the shared libraries that it needs (for executables)
+ldd <filename>
+
+# see data secions in elf-type file:
+fromelf -ds <name>
+
+# show elf-header infos
+readelf <file>
+
+# show hexdump of file
+hexdum -C -n 64 <file>

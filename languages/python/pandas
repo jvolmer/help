@@ -1,0 +1,41 @@
+# column-oriented data analysis API
+import pandas as pd
+
+# Series: single column
+column1 = pd.Series(['Test', 'Bla', 'Yes'])
+column2 = pd.Series(['ok', 'no', 'good'])
+
+# data frame
+data = pd.DataFrame({'Left': column1, 'Right': column2})
+
+# adding columns to dataframe
+data['<new column name>'] = pd.Series([...])
+data['<new column name 2>'] = data['<col1>'] / data['<col2>']
+
+# read csv
+data = pd.read_csv("<path>", sep=",")
+
+# show some statistics
+data.describe()
+
+# show first few recors
+data.head()
+
+# produce histogram
+data.hist('<column name>')
+# to show it:
+import matplotlib.pyplot as plt
+plt.show()
+
+# accessing and manipulating data: similar to dict/list operations
+# for more complex single-column transformations
+data.apply(...)
+# e.g. lambda val: val>1000000
+
+# show indices of series or dataframe rows (fixed and therefore independent of ordering)
+data.index
+# you can choose different indices (could be also strings) by setting index column manually
+
+# reorder
+data.reindex(<list of reordered indices>)
+# e.g. [2,0,1] or np.random.permutation(data.index)

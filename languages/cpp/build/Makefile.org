@@ -1,0 +1,5 @@
+# auto-dependency generation
+http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+
+# all short codes of make
+https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html#Automatic-Variables

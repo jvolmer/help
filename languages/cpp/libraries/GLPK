@@ -1,0 +1,14 @@
+# wiki
+en.wikibooks.org/wiki/GLPK/Using_the_GLPK_callable_library
+
+# documentation for v4.52
+most.ccib.rutgers.edu/glpk.pdf
+
+# small example
+en.wikibooks.org/wiki/GLPK/Using_the_GLPK_callable_library
+
+# some C++ examples
+bumpyroadtocode.com/2017/10/08/linear-programming-using-glpk-gnu-linear-programming-kit/
+
+# make it object-oriented
+www.cs.unb.ca/~bremner/blog/posts/glpk-cpp/

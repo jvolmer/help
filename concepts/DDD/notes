@@ -1,0 +1,4 @@
+* getters ok, for setters use model description
+* design by contract using assert, e.g. in setter directly check
+* law of demeter
+* in service only put logic that does not belong to an object

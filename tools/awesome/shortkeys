@@ -1,0 +1,36 @@
+# run commands
+mod4-Enter		start new terminal
+Mod4-r		start run prompt
+Mod4-s		show overview of key bindings
+
+# layouts
+Mod4-Space		switch to next layout
+~/.config/awesome/rc.lua  change layout designs here
+
+# navigation
+## windows
+Mod4-dragandclick	move windows around in layout
+Mod4-f		make active window full screen - and go back by pressing it again
+Mod4-m		maximize active window
+Mod4-n		minimize active window
+Mod4-C-n		get minimized window back
+Mod4-Shift-c	close window (better: use closing command of program)
+Mod4-j		focus next client
+Mod4-k		focus previous client
+Mod4-C-j		focus next screen
+Mod4-C-k		focus previous screen
+
+## tags
+Mod4-N		go to tag N
+Mod4-Left		go to tag left
+Mod4-right		go to tag right
+
+# layout modification
+Mod4-Shift-j	switch client with next client
+Mod4-Shift-k	switch client with previous client
+Mod4-o		send client to next screen
+Mod4-Shift-<n>	send client to tag number <n>
+Mod4-h		decrese master width factor by 5%
+Mod4-l		increase master width factor by 5%
+
+Mod4-Shift-q	quit awesome

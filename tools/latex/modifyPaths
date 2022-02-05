@@ -1,0 +1,5 @@
+# get directory for local latex stuff
+kpsewhich -var-value TEXMFHOME
+
+# set home directory (tlmgr is the TeX Live package manager)
+tlmgr conf texmf TEXMFHOME "<path>[:<anotherpath>]"

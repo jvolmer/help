@@ -1,0 +1,49 @@
+* Hardware
+
+# Get to know which GPU is used:
+lspci | grep VGA
+lspci -v -s <ID(xx:xx.x) you got from line above>
+
+Get MAC number via
+#+begin_src shell
+  ifconfig
+#+end_src
+
+Get RAM size
+#+begin_src shell
+ free 
+#+end_src
+
+Show processor infos
+#+begin_src shell
+  lscpu
+#+end_src
+
+Get system architecture
+#+begin_src shell
+  dpkg --print-architecture
+#+end_src
+
+** Remap Keys
+
+Remap Back and Forward keys to be PgUp and PgDown
+#+begin_src shell
+  xmodmap -e 'keysym XF86Back = Prior' -e 'keysym XF86Forward = Next'  # OR
+  xmodmap -e 'keycode 166=Prior' && xmodmap -e 'keycode 167=Next'
+#+end_src
+and backwards
+#+begin_src shell
+  xmodmap -e 'keycode 166=XF86Back' && xmodmap -e 'keycode 167=XF86Forward'
+#+end_src
+
+** Wireless devices
+
+Show wireless devices
+#+begin_src shell
+  rfkill list
+#+end_src
+
+Enable device that is blocked
+#+begin_src shell
+  rfkill unblock <device number>
+#+end_src

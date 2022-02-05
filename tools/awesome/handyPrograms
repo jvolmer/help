@@ -1,0 +1,11 @@
+# lock screen
+i3lock -d
+
+# add keyboard layers [use keycombo to switch between them]
+setxkbmap -layout "us,de" [-option "grp:alt_shift_toggle"]
+
+# show battery level
+acpi
+
+# test changes in rc.lua
+Xephyr :5 & sleep 1 ; DISPLAY=:5 awesome

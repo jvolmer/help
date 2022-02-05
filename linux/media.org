@@ -1,0 +1,23 @@
+* Pictures / Pdfs
+
+Put pictures / pdfs together in one pdf
+#+begin_src shell
+  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=<name>.pdf file1 file2 ...
+#+end_src
+| -dFirstPage=N | start page |
+| -dLastPage=N  | last page  |
+
+Convert picture to grey colors
+#+begin_src shell
+  gs \
+   -sDEVICE=pdfwrite \
+   -dAutoRotatePages=/None \
+   -sColorConversionStrategy=Gray \
+   -dProcessColorModel=/DeviceGray \
+   -dCompatibilityLevel=1.4 \
+   -dNOPAUSE \
+   -dBATCH \
+   -sOutputFile=bla.pdf \
+   input.pdf
+#+end_src
+

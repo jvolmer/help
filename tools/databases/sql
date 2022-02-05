@@ -1,0 +1,107 @@
+# open mysql
+sudo mysql
+
+# create database (in /var/lib/mysql/)
+create database <database name>;
+
+# delete database
+drop database <database name>;
+
+# open database
+use <database name>;
+
+# create table
+create table <table name> (<varname> <vartype>, ...);
+# vartypes
+int, char, varchar(<#chars>), date {yyyy-mm-dd}
+# additional features
+not null, primary key, auto_increment, default <default value>
+
+# add/delete variable
+alter table <table name> add <varname> <vartype> [after <varname2>];
+alter table <table name> drop <varname>;
+alter table <table name> modify <varname> <vartype>;
+alter table <table name> change column <old varname> <new varname> <vartype>;
+alter table <table name> rename [to] <new table name>;
+alter talbe <table name> drop primary key;
+
+# insert row
+insert into <table name> [(<varname1>, <varname2>, ...)] values (<value1>, <value2>, ...);
+#[...] needed for different value order or not giving every var a value
+# insert date and time with ''
+# can use now() for date and time
+
+# change entry
+update <table name> set <var name> = <value> where <condition>;
+# e.g. where <table name>.<var2 name> = <value2>
+
+# delete row
+delete from <table name> where <condition>;
+
+# load table from file
+load data local infile <path> into table <table name> [lines terminated by '\r\n'];
+# tab-delimited text file, use \N for null values
+
++++++ Querys +++++
+# read query from file (does not have to be in secure dir)
+source <file>
+
+# show full table 
+select * from <table name> [into outfile '<filename>']
+# calculations are possible
+# define var with @<varname> := ... and use it also via @<varname>
+# output into file, have to choose '/var/lib/mysql-files/' because of --secure-file-priv option
+select [distinct] <column> from <table name> where <condition>;
+select <column> from <table> order by <column> [desc];
+
+# extracting dates
+timestampdiff(YEAR,<column1>,<column2>) as <new column name> # compute time differences (use curdate() for current date)
+year(<column>), month(), dayofmonth()
+date_add(<date>, interval 1 month) # add one month to <date>
+
+# pattern matching
+# SQL pattern matching, e.g. WHERE name [NOT] LIKE pattern (pattern e.g. 'b%')
+# succeeds only if pattern matches entire value
+_ single character
+% arbitrary number of characters
+# extended regular expressions, e.g. WHERE REGEXP_LIKE(name, pattern) (pattern e.g. '^b')
+# succeeds if pattern mathces anywhere in tested value
+# for case sensitivity
+SELECT * FROM pet WHERE REGEXP_LIKE(name, '^b' COLLATE utf8mb4_0900_as_cs); # use case-sensitive collation
+SELECT * FROM pet WHERE REGEXP_LIKE(name, BINARY '^b'); # make one of the strings a binary string
+SELECT * FROM pet WHERE REGEXP_LIKE(name, '^b', 'c'); # specify the c mathc-control character
+
+# counting rows
+select <column>, count(*) from <table> group by <column>;
+# both <column> should be the same and can be more than just one column
+
+# queries for more than one table
+select <table1>.<columnA>, <table2>.<columnB>
+       from <table1> inner joint <table2>
+       on <table1>.<columnA> = <table2>.<columnX>
+       where <condition>;
+# (inner) join: rows from either table appear in result if and only if both tables meet the conditions specified in on-clause
+# left (outer) join: include all rows from left table and matched records from right table
+# right (outer) joint: accordingly
+# full (outer) join: return al records when there is a match in either left or right table
+
+++++++++ get infromation about databases and tables +++++++++
+# list databases managed by server
+show databases
+
+# show currently selected database
+select database();
+
+# show tables in open database
+show tables;
+
+# show table vars
+describe <table name>;
+
++++++++ batch mode +++++++
+mysql < <text_file>
+mysql < <text_file> > <outputfile>
+mysql < <text_file> | more
+
+# batch mode output does not show lines, if you want to have that use mysql -t
+# To echo to the output the statements that are executed, use mysql -v.

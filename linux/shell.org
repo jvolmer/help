@@ -1,0 +1,31 @@
+* Shell
+
+What shell I am using
+#+begin_src shell
+  echo $SHELL
+#+end_src
+
+Reload settings of file
+#+begin_src shell
+  source <file>
+#+end_src
+
+Do both: save output of executable in file and show it on screen
+#+begin_src shell
+  <executable> 2>&1 | tee <file>
+#+end_src
+
+Suppress errors: Add =2>&-= at end of command
+
+* Bash
+
+Check if file exists
+#+begin_src bash
+  if [ -f $FILE ];
+  then
+     echo "File $FILE exists."
+  else
+     echo "File $FILE does not exist."
+  fi
+#+end_src
+

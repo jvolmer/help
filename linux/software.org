@@ -1,0 +1,130 @@
+#+TITLE: Software
+
+* Installing software with apt
+
+** Find
+#+begin_src shell
+  apt search
+  apt show
+  apt list
+#+end_src
+
+** Install
+#+begin_src shell
+  apt install
+#+end_src
+
+** Remove
+#+begin_src shell
+  apt remove
+  apt purge   # remove with configuration
+  apt autoremove   # remove irrelevant packages
+#+end_src
+
+** Update
+#+begin_src shell
+  apt update  # refresh repository
+  apt upgrade  # upgrade all upgradeble packages
+  apt full-upgrade  # upgrade packages with auto-handling of dependencies
+#+end_src
+
+** Edit repositories
+#+begin_src shell
+  apt edit-sources
+#+end_src
+
+* Repositories
+https://itsfoss.com/how-to-remove-or-delete-ppas-quick-tip/
+
+** Show repositories
+#+begin_src shell
+  grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/*  # OR
+  apt edit-sources
+#+end_src
+(links are given as http://ppa.launchpad.net/<name>/ubuntu)
+
+** Add repository
+#+begin_src shell
+  sudo add-apt-repository [ppa:]<name>
+#+end_src
+
+** Remove repository
+#+begin_src shell
+  sudo add-apt-repository --remove ppa:<name>   # OR
+  sudo rm -i /etc/apt/sources.list.d/<PPAName>.list
+#+end_src
+
+Delete stuff that is part of a repository
+#+begin_src shell
+  sudo ppa-purge ppa-url
+#+end_src
+
+* Set default program version with update-alternatives
+
+** Add
+Add an alternative with some priority
+#+begin_src shell
+  
+  sudo update-alternatives --install /usr/local/bin/python python
+  /usr/bin/python2 20
+  
+#+end_src
+
+#+begin_src shell
+  
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 \
+       --slave /usr/bin/c++ g++ /usr/bin/g++-9 \
+       --slave /usr/bin/gcov gcov /usr/bin/gcov-9 \
+       --slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-9 \
+       --slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-9 \
+       --slave /usr/bin/cpp cpp /usr/bin/cpp-9
+  
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 \
+       --slave /usr/bin/c++ g++ /usr/bin/g++-11 \
+       --slave /usr/bin/gcov gcov /usr/bin/gcov-11 \
+       --slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-11 \
+       --slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-11 \
+       --slave /usr/bin/cpp cpp /usr/bin/cpp-11
+  
+#+end_src
+
+** Query
+See options
+#+begin_src shell
+  
+  update-alternatives --query python
+  
+#+end_src
+
+** Choose
+Choose to use another verions manually
+#+begin_src shell
+  
+  sudo update-alternatives --config python
+  
+#+end_src
+
+Set alternative back to auto
+#+begin_src shell
+  
+  sudo update-alternatives --auto python
+  
+#+end_src
+
+** Remove
+Remove an alternative
+#+begin_src shell
+  
+  sudo update-alternatives --remove python /usr/bin/python2
+  
+#+end_src
+
+Remove all alternatives
+#+begin_src shell
+  
+  sudo update-alternatives --remove-all python
+  
+#+end_src
+
+* Kernels
+Removing old kernels: https://help.ubuntu.com/community/RemoveOldKernels#Manual_Maintenance

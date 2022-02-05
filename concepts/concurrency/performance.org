@@ -1,0 +1,86 @@
+#+TITLE: Performance
+
+https://hpc.llnl.gov/training/tutorials/introduction-parallel-computing-tutorial
+https://en.wikipedia.org/wiki/Performance_tuning
+
+Concurrent programming: different parts of a program execute independently
+Parallel programming: different parts of a program execute at the same time
+
+Processor = CPU
+A processor can have several cores (which can execute stuff in parallel)
+
+* Program execution
+Both processes and threads are independent sequences of execution
+** Process
+An exectued program runs in a process, the operating system manages multiple processes at once
+Each process provides the resources needed to execute a program (address space, code, env vars, ...)
+** Thread
+The program can have independent parts that run simultaneously in threads
+A thread is an entity within a process that can be scheduled for execution, share address space and system resources
+
+* Types
+** Multiprocessing (true concurrency and parallelism)
+works on several processors / cores
+true parallelism and concurrency
+has its own memory
+Philosophy: Do one thing in less time
+** Multittasking (perceived concurrency and parallelism)
+(Multithreading is multitasking for one program)
+works on one processor / core
+CPUs switches between processes / threads really fast but only one thread is running at one time
+share memory
+Philosophy: Do different things together
+Why: Improve perceived performance / hiding latency, e.g. keep UI responsive or hide latency
+
+* Communication between execution units (processors / tasks / threads)
+** Message passing
+** Shared state
+*** Mutexes
+Allow Access to Data from One Thread at a Time
+aquire lock before and unlock after
+*** Atomic reference counting
+
+* Examples for Multiprocessing APIs
+** OpenMP
+shared memory multiprocessing (parallelism withing multi-core node)
+** MPI
+message passing without shared memory (parallelism between nodes)
+
+* Scaling
+Ability of hardware and software to delivery greater computational power when the amount of resources is increased (desirable: proportional)
+
+** Strong scaling
+- For problem of fixed size:
+- speedup for N processors = t_1 / t_N = 1 / (s + p/N) - s in time-fraction on non-parallizable execution, p on parallizable one
+  Upper limit of speedup is determined by serial fraction of the code (e.g. 20h on one processor, s=1/20, N=inf: speedup = 20)
+  If you want to have some speedup, s has to be lower than some value
+- Measure: total computational time(N) with fixed problem size
+  => Size of problem per core becomes smaller
+  => There is a max number of cores that make sense to use to improve performance for effectively using resources
+          Otherwise try to improve runtime inside core
+
+
+** Week scaling
+- Based on the approximation that the parallel part scales linearly with the amount of resources and the serial part does not increase with respect tot the size of the problem. (Depends on problem whether this approximation applies, E.g. nearest-neighbor communication: communication overhead is relatively constant regardless of number of processes)
+- Scaled speedup = s + p * N
+- Measure: total computation time(N) with fixed problem size per processor
+  => Size of problem per core is fixed
+  => Runtime stays the same for larger problem.
+  => Use small amounts of resources for small problems and large quantities of resources for big problems
+
+** Horizontal scaling
+Use more computers / nodes
+
+** Vertial scaling
+Use larger computers / nodes
+
+** Parallization Overhead
+- Communication: Network/Disk IO
+- Load-balancing
+- Throughput
+- Latency
+- Synchronization / Consistency
+
+* Consistency
+Strong consistency: there is always only one valid version of stored data in the whole cluster
+Eventual consistency: Copies are updated asynchronously, read may not get latest write, only gives back correct value after it converged

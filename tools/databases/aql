@@ -1,0 +1,55 @@
+# insert into collection
+INSERT document INTO collectionName
+# with document beeing an object like JSON - {key: value, key:value, ...}
+
+# define variables
+LET variableName = valueExpression
+
+# iterate 
+FOR variableName IN expression
+
+# return document
+FOR c IN collectionName; return c
+
+# return specific document
+RETURN DOCUMENT(collectionName, documentKey)
+RETURN DOCUMENT(documentId)
+
+# update document
+UPDATE documentKey WITH object IN collectionName
+# object can be just one key:value pair
+# can also be done in a loop, e.g. to add new attribute to all documents
+
+# replace entire document
+REPLACE documentKey WITH object IN collectionName
+
+# remove document
+REMOVE documentKey IN collectionName
+
+# filter collection by name
+FOR c IN collectionName
+    FILTER c.key == value
+    RETURN c
+# to show only documents with value != null for key
+FILTER c.key
+
+# limit amount of documents
+LIMIT totalNumber
+LIMIT skippingAtStart, totalNumber
+
+# sort documents [in reverse order]
+SORT document.key [DESC]
+
+# array expansion operator - to show only key of array 
+array[*].key
+
+# join
+FOR c IN collectionName1
+    RETURN DOCUMENT(collectionName2, c.key)
+
+# merge collections
+merge(document1, document1)
+
+# traversal: walks graph and iteractes over connected vertices it finds
+FOR v in <minDepth>..<maxDepth> OUTBOUND|INBOUND|ANY <startVertex_ID> <GraphName>
+    RETURN v.name

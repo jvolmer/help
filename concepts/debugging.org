@@ -1,0 +1,63 @@
+#+TITLE: Debugging
+
+* gdb
+Debugger
+
+** Run
+#+begin_src shell
+  
+  gdb --quiet --args <executable>
+  
+#+end_src
+
+** Commands inside
+
+Get help with =help <command>=
+
+| r                            | Run to next breakpoint or to end                   |
+| br                           | Print backtrace of all stack frames                |
+| catch <breakpoint>           | Define a catchpoint (e.g. 'catch syscall connect') |
+| info threads                 | Show what threads are doing                        |
+| thread apply all backtrace 2 | Get one more stackframe fo all threads             |
+
+* strace
+Runs the specified command and records the system calls which are called and signals that are received (show in stderr)
+
+#+begin_src shell
+  
+  strace [options] <executable>
+  
+#+end_src
+
+Options:
+=-e '<name>'= Only show system calls with that system call name
+=-f= show children processes (other than main process)
+
+* htop
+
+* Rust
+
+Show info logs for everything, but for specific packages show debug logs
+#+begin_src shell
+  
+  RUST_LOG=info,<some used package>=debug cargo run --quiet
+  
+#+end_src
+
+Get type of something, e.g. to print it out
+#+begin_src rust
+  
+  fn type_name_of<T>(_: &T) -> &'static str {
+    std::any::type_name::<T>()
+  }
+  
+#+end_src
+* General
+
+Don't show stdout of command
+#+begin_src shell
+  
+  <command> > /dev/null
+  
+#+end_src
+

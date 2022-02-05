@@ -1,0 +1,83 @@
+* Text
+
+** Find  lines (=grep=)
+Show lines in <file> that match <pattern>
+#+begin_src shell
+  grep <pattern> <file>
+  cat <file> | grep <pattern>
+#+end_src
+
+Options
+| -n   | Show line numbers             |
+| -v   | Invert search                 |
+| -r   | Recursive search              |
+| -w   | match whole word              |
+| -A N | Show N lines before           |
+| -B N | Show N lines after            |
+| -C N | Show N lines before and after |
+
+Search in a lot of files
+#+begin_src shell
+  grep -rnw <path> -e <pattern>
+#+end_src
+Include / exclude files / directories with (e.g. <pattern> = =\*.{c,h}=
+| --include=<pattern>     |
+| --exclude=<pattern>     |
+| --include-dir=<pattern> |
+| --exclude-dir=<pattern> |
+
+** Filter and transform data (=sed=)
+Replace all (g) <old> with <new>
+#+begin_src shell
+  sed 's/<old>/<new>/g'
+#+end_src
+
+Options
+| -i | Save result back to file |
+
+A lot of short commands: http://sed.sourceforge.net/sed1line.txt
+
+Delete lines
+#+begin_src shell
+  sed '1d'  # first line
+  sed '$d'  # last line
+  sed '/^#/ d'  # lines starting with #
+#+end_src
+
+Show lines between <first_n> and <second_n>
+#+begin_src shell
+  sed -n <first_n>,<second_n>p
+#+end_src
+
+** More complicated stuff (=awk=)
+
+#+begin_src shell
+  awk '{print $N}'  # print Nth column
+  awk '{print $1 + $2}'  # add columns 1 and 2
+  awk '{sum += $N} END {print sum}'  # add numbers of Nth column
+  awk '{if ($2 + 0 != 0) print $1, $2, $3, $3/$2}' <File> | awk '{print $1, $2, ($4 < 1) ? $3 : 0}' # if error too large print 0
+  awk 'NR == 0 || NR % 2 == 0'  # print every 2. line
+#+end_src
+
+** Compare and combine
+
+Show files next to each other
+#+begin_src shell
+  sdiff <file1> <file2>   # all
+  sdiff <file1> <file2> | grep '[<|>]'  # show only differences
+#+end_src
+
+Print  file 1  file2 (file2 in additional columns)
+#+begin_src shell
+  paste <file1> <file2>
+#+end_src
+
+Sort exponential values numerically min to max (LC_ALL=C is required)
+#+begin_src shell
+  sort -g file
+#+end_src
+
+Sort by column <x> to <y> numerically and reverse (max to min)
+#+begin_src shell
+  sort -k<x>,<y>gr
+#+end_src

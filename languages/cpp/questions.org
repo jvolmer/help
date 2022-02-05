@@ -1,0 +1,7 @@
+* C++ Questions
+** Better way to need to implement == and >> for running tests
+Rust uses traits for that and you can use their default implementation (e.g. Debug and PartialEq)
+** Difference between template<class T> and template<typename T>
+** Why not use a constexpr constructor everywhere possible
+** std::variant at compilation time: subtypes?
+** self type (e.g. as return type for static member function instead of constructor)

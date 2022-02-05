@@ -1,0 +1,14 @@
+# see network manager status
+sudo service network-manager status
+
+# show all connections
+nmcli connection show
+
+# show all wifis
+nmcli dev wifi
+
+# start wifi connection with asking for password
+sudo nmcli --ask con up id '<wifi-name>'
+
+# restart network (if symbol does not show up in task panel)
+sudo service network-manager restart

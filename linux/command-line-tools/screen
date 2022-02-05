@@ -1,0 +1,27 @@
+In Screen Session: C-z ...
+:remove / X		remove this window
+Q	  		remove all windows but the current one
+:resize -h [+,-]<N>	resize window [+,-]<N> lines
+:sessionname <Name>	change session name
+A	     		change window name
+C-\			force quit of session (with all windows)
+k			kill this window
+D D			detach and logout
+c 			create new window
+Q			close all splits
+X			close all active windows
+Tab			go to other split window
+
+Outside of Screen Session
+screen -S <Name>		create new session with name <Name>
+screen [-S <Name>] -X quit 	exit whole session with name <Name> (with -S for more than one session active)
+screen -X -S <Id> quit          exit whole session with Id
+screen -X sessionname <Name> 	change session name to <Name>
+screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill
+       	     	  	     	kill all Detached screen sessions
+
+Help
+#Hardstatus: https://www.gnu.org/software/screen/manual/html_node/String-Escapes.html
+#Hardstatus: http://www.kilobitspersecond.com/2014/02/10/understanding-gnu-screens-hardstatus-strings/
+#General: http://aperiodic.net/screen/
+#lot of References (also to scripts in which you call screen): http://aperiodic.net/screen/quick_reference

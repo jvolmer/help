@@ -1,0 +1,117 @@
+#+TITLE: C++ Notes
+
+* Sizes
+Rust: default i32
+Data model LP64
+short - i16
+int - i32
+long - i64
+(pointer - 64)
+
+char - 8
+double - 64 (15 decimal digits of precision)
+float - 32 (7 decimal digits of precision)
+
+** Integer literal
+*** Decimal
+2^8 =256
+2^16 = 65'536
+2^32 = 4'294'967'296
+
+*** Hexadecimal
+0x2a = 42 (2*16 + 10)
+4 digits is 16bits long (short) 0xffff = 65'536
+8 digits is 32bits long (int)
+
+** Word
+word size = the number of bits that the CPU can process in one operation
+E.g. for x86-64: 64, ARMv8-A and ARMv9-A : 64
+
+* Pointer vs Reference
+** Reference
+( can be viewed as a constant pointer with automatic dereferencing)
+- References another memory location, must be bound to some location and cannot be rebounded (value can be changed except if it is a const ref)
+- its own address and size are invisible, therefore Is another name of some other variable - can be used as if it is this other variable
+- constant references can also be initialized with r-values -> extends lifetime of r-value
+
+** Pointer
+- Pointer to any memory location, can also point to nothing (nullptr), can change where it is pointing at
+- Needs to dereference (*) to access the memory location it points to
+- has its own address
+
+Pointer to a const value ~const int* ptr;~
+Const pointer ~int* const ptr;~
+(Everything before * is the value type the pointer points to)
+
+** Operators
+~int* ptr = a;~ Can be read as: If ptr is dereferenced, you get a.
+- Address-of &
+- Dereference *
+
+* STL
+** Others
+*** Consts
+- Use ~constexpr~ for compile-time constants, can use if in if-statements as well (~if constexpr(condition)~) (since c++17)
+- Use ~const~ for run-time constants
+*** Templates
+- Create templates with ~template <typename T>~ (and optionally additional non-type parameter)
+- Can specialize a function or full class for a specific type
+- Cannot separate declaration (in hpp) and implementation (in cpp). Best way around is to have everything in the header (can lead to longer compile and link times and not larger executable) or have an additional file where you define explicitly, which template specializations are needed (and which includes the hpp and cpp file)
+*** Type aliases
+- Define a type via ~using int8_t = char;~ (don't use typedef)
+- Type aliases are not typesafe (is not a distinct type)
+*** Enums
+Use enum class (stronly typed and strongly scoped): ~enum class Color { red, blue };~
+*** Internal/external linkage
+internal: can only be accessed from the same file (therefore it is not exposed to the linker)
+external: can be accessed from inside the file and from outside (via a forward declaration)
+- functions and global (non-const) variables have external linkage by default
+- ~static~ before global variables and functions set them to internal linkage (static can also refer to lifetime)
+- const and constexpr global variables have internal linkage by default
+- ~extern~ before const and constexpr global variables give them external linkage, then ~extern~ has to be also used in the forward declaration (also non-const variable forward declarations need ~extern~ to differentiate them from variable declaration)
+
+** C++14
+*** Binary literals and digit separator
+*** Function return type deduction
+*** Generic lambdas (lambda with at least one auto parameter)
+- lambdas are a specific type of object (a functor) that overload ~operator()~, therefore each lambda has its own type.
+- Easiest to use ~auto~, if not - e.g. as input to a function - possible use ~std::function<return type(input parameter types)>~
+- A unique lambda is created for each type-resolved generic lambda
+- Captures: (data member of the lambda object) by value are cloned and are const per default, by reference is not constant and refers to original variable, default-capture: capture all used variables by value / reference: [=] / [&], make sure that captures by reference outlive the lambda
+- Standard library functions may copy function objects (reminder: lambdas are function objects). If you want to provide lambdas with mutable captured variables, pass them by reference using std::ref (std::reference_wrapper allows to pass a normal type as if it were a reference, canbe created via std::ref(<var>)
+- Try to avoid lambdas with states altogether. 
+*** std::make_unique to create unique_ptr
+
+** C++17
+*** Structured binding
+- For arrays
+  ~double myArray[3] = {1, 2, 3}; auto [a, b, c] = myArray;~
+- If initializer supports ~std::tuble_size<>~ and provides ~get<N>()~ function
+  ~auto [a, b]  = myPair;~
+- If initializer's type contains only non-static, public members
+  ~struct S { int x1: 2; volatile double y1;  }; S f(); const auto [x, y] = f();~
+
+You can use ~const auto~ or ~auto&~ with it
+*** If-initializers
+~if (init; condition)~ (same for switch) -> initilized variable belongs to if-scope
+*** Inline Variables
+- inline: multiple definitions are allowed (not/non-binding: inlining is preferred)
+- inline variable can be defined in multiple files without violating the one definition rule
+- Inline variables have external linkage by default
+- The linker will consolidate all inline definitions of a variable into a single variable definition, if they are all the same (will not be copied into each file which includes them)
+- E.g. hpp file: initialize the constants as inline constexpr, include this hpp wherever used and use the constants; these constants will only be instantiated once and be shared across all code files (thus not everything has to be recompiled 
+*** Constexpr if
+~if constexpr(condition)~
+*** Fold-Expressions
+to write variadic templates (functions with variable number of parameters) in a cleaner way
+#+begin_src cpp
+  template<typename ...Args> auto sum2(Args ...args) 
+  { 
+      return (args + ...);
+  }
+#+end_src
+*** Declaring non-type template parameters with auto
+*** std::string_view for read only strings
+
+** C++20
+*** Ranges

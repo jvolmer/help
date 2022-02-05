@@ -1,0 +1,50 @@
+* cmake for projects
+https://github.com/dr-kino/BraveCoverage/blob/master/test/CMakeLists.txt
+
+** There are two types of targets, executables and libraries
+
+** Scope
+Sequence of commands in one file does not matter
+*** Directory scope
+Defined stuff affects targets in current directory and all subdirectories
+=include_directories(<path>)=
+*** Target scope
+specified via PRIVATE, PUBLIC, INTERFACE (there is only private and interface: private properties are used internally to build the target (build requirements), interface properties are used externally by users of the target (usage requirements))
+public properties are defined in both private and interace scopes
+
+https://stackoverflow.com/questions/31037882/whats-the-cmake-syntax-to-set-and-use-variables
+
+** How to call functions
+
+** Projectstructure
+
+** Configure time vs Build time (?)
+
+** Usage
+
+From the root (not build dir)
+#+begin_src shell
+  # generate build system
+  cmake -S . -B build # -S <path-to-source> -B <path-to-build> [will be created if not exists]
+  # build
+  cmake --build build # equivalent to make in build dir
+  # with variables: -D<var>=<value>
+  
+  # install
+  cmake --install build # equivalent to make install in build dir
+                        # for CMake < 3.15 : cmake --build build --target install
+  
+  cmake --build build --target <TARGET> # equivalent to make <TARGET>
+#+end_src
+
+* Links
+
+# resources
+https://gitlab.kitware.com/cmake/community/-/wikis/Home
+
+# convert from Makefile
+https://www.hiroom2.com/2016/09/07/convert-makefile-to-cmakelists-txt-manually/
+https://stackoverflow.com/questions/40860769/convert-makefile-into-cmakelists-where-to-start
+
+# tests
+https://gitlab.kitware.com/cmake/community/-/wikis/doc/ctest/Testing-With-CTest
