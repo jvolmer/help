@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1
+FROM node:12-alpine
+# if additonal stuff is needed for set up
+# RUN apk add --no-cache python g++ make
+WORKDIR /app
+COPY package.json yarn.lock ./
+# build application
+RUN yarn install --production
+# add files from host directory to container workdir (files in .dockerignore are ignored)
+COPY . .
+# default command to run when container is started from that image
+CMD ["node", "src/index.js"]
+
+
+# each line represents one image layer
+# COPY . . should come as late as possible such that build is much faster when changing something in source code

@@ -1,0 +1,157 @@
+#+TITLE: Docker
+
+Um Sachen in Isolation auszufuehren: Mach eine Sache, aber gut
+
+Ist nice zum entwickeln, kann in Produktion extremen overhead haben und zu instabilitaeten fuehren, daher nutzt kubernetes docker nicht mehr zum laufen lassen von containern (die images konennen trotzdem mit docker gebaut werden)
+
+Um security fixes in images zu erhalten, muessen diese neu heruntergeladen werden
+   [[newreleases.io][Neue Versionen von base images]]
+
+Distroless Images: Smaller and less security risks but not nice to develop
+
+Analogie: 
+- Dockerfile: Sourcecode
+- Image: Executable
+- Container: Prozess
+
+* Docker Repo
+
+Repo for docker base images
+
+Docker Registry: [[hub.docker.com][dockerhub]]
+
+Hier findet man Tags und Nutzungshinweise (z.B. /var/www, Umgebungsvariablen, Ports, Folder wo Daten gespeichert werden (z.B. von DB))
+
+Besser gepinnte Version statt latest nutzen
+
+* Allgemeiner Prozess
+
+Dockerfile -> ~docker build~ -> Docker Image -> ~docker run~ -> Docker Container
+
+Erzeugtes Image ist ein Standard Image - kann von allen anderen Container Tools ausgefuehrt werden
+
+* Create Image
+
+** Basic
+
+#+begin_src dockerfile
+  
+  FROM node:lts-alpine as assemble # base image
+  WORKDIR /app
+  COPY . . # ignores: .dockerignore, nicht da: nutzt .gitignore
+
+  RUN npm ci # clean install (loescht node-modules)
+  RUN npm run build
+  
+  # multi-stage build for smaller images
+  FROM nginx:1.19.0-alpine as runtime # um statische Datein zu hosten
+  COPY --from=assemble /app/build /var/www
+  
+  EXPOSE 80 # nur zur Dokumentation, muss immer manuell mit angegeben werden (-p)
+  ENTRYPOINT ["nginx", "-g", "daemon off;"] # Chefprozess: wenn der stopped, stopped der Container
+  # besser direkt Prozess starten - wie hier - statt shell Skript (Signale handeln ist schwierig)
+  
+#+end_src
+
+Very small linux base image is alpine
+
+To which directly to copy to: have a look at base image documentation on dockerhub
+
+** Using cache efficiently
+Almost each line creates a new intermediate image (stage) with a specific hash, cashes all of them
+When rebuilding in each stage: If nothing has changed (basically hash is the same), use old intermediate image (ignore that with ~--no-cache~)
+
+See stages with
+#+begin_src sh
+  
+  docker history <image>
+  
+#+end_src
+
+#+begin_src dockerfile
+  
+  FROM node:16.3.0-alpine3.11 as assemble
+  WORKDIR /app
+  # this this the important line:
+  # if something in dir changes (except package*.json), docker can still use cache here
+  COPY package*.json ./
+  RUN npm ci
+  COPY . .
+  RUN npm run build
+  
+  FROM nginx:1.21.0-alpine as runtime
+  COPY --from=assemble /app/build /usr/share/nginx/html
+  COPY nginx.conf /etc/nginx/nginx.conf # some config file needed from nginx
+  
+  EXPOSE 80
+  ENTRYPOINT nginx -g "daemon off;"
+  
+#+end_src
+
+Best practices to write [[https://docs.docker.com/develop/develop-images/dockerfile_best-practices/][Dockerfile]]
+
+Beispiel: tag LoesungAufgabe1 im infrastrucure-workshop Projekt
+
+** Vorgehen zum Schreiben eines Dockerfiles
+- build selber ausprobieren
+- nach base image suchen
+
+** Build image
+
+#+begin_src shell
+  
+  docker build . -t <name>
+  
+#+end_src
+
+* Run Image
+
+Mit run erstelle ich einen neuen Container
+
+#+begin_src shell
+  
+  docker run <image (name or hash-start)>
+  
+  -it # Start interactively
+  -d  # Im Hintergrund
+  # ohne -it oder -d: Output in Shell
+  --rm # Delete container after it is stopped
+  
+#+end_src
+
+Run with different entrypoint
+#+begin_src sh
+  
+  docker run --entrypoint sh
+  
+#+end_src
+
+Map port and define environment variable (can only be done with run, not start)
+#+begin_src sh
+  
+  docker run -p <host>:<container> -e PASSWORD=secret
+  
+#+end_src
+
+Map volume
+#+begin_src sh
+  
+  docker run -v <host folder>:<container folder>
+  
+#+end_src
+
+* Publish image
+
+#+begin_src shell
+  
+  docker build . - t docker.cluster.lise.de/my-backend:latest
+  # docker tag alpine docker.cluster.lise.de/my-backend:latest (alternatively)
+  docker push docker.cluster.lise.de/my-backend:latest
+  
+#+end_src
+
+Auf [[https://sonatype.cluster.lise.de][cluster]] ansehbar
+
+* TODO Lookup
+- nginx similar to apache zum Ausliefern
+- CMD vs ENTRYPOINT

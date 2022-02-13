@@ -1,0 +1,31 @@
+#+TITLE: Awesome command line tools
+https://www.youtube.com/watch?v=v2RmxZ9Vcps
+
+Up/down: history
+Tab: Completion
+
+* Discoverability
+- Autocompletion as I type: Give options (popup menu) (PGCLI)
+- Show command completion I used most recently, go to ones before with arrow keys (Fish Shell)
+
+-> Be forthcoming and don't hide special keys
+
+* User Focus
+- bad: e.g. MySQL: Tab completion only for CAPSLOCK and too many options for tab completion for table name
+- Give possible options for Tab completion (only ones that are applicable, but also keep in mind stuff (e.g. lower caps = large caps), b, perhaps show helpful stuff for a specific argument, e.g. how to use a function (bpython)
+  
+-> User comes first, Implementation later
+
+* Configurability is evil
+Only configure absolutely necesary options
+Otherwise: Should give good defaults
+
+-> Subjective options only (e.g. color scheme)
+
+* Checklist
+** Persistent History
+** History search (Control-R or show last command in grey which start with what you already showed - FishShell)
+** Emacs Keybindings (Ctrl-a, Ctrl-e, Ctrl-b, -f)
+** Auto-Completion
+** Minimal Config
+** Syntax Coloring

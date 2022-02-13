@@ -1,0 +1,117 @@
+# infos
+kubectl verison
+kubectl cluster-info
+kubectl get nodes // gives all nodes that can be use to host our application
+kubectl get secret [<secret> -o yaml] // (use base64 -d to view it)
+
+# configuration
+
+## view
+kubectl config view --minify
+
+kubectl config get-contexts
+kubectl config use-context <context>
+
+## switch namespace
+kubectl config set-context --current --namespace <namespace>
+
+
+# deployment
+
+## create deployment (searches for suitable node, schedules application to run on that node, configure cluster to reschedule instance on new node when needed)
+kubectl create deployment <deployment-name> --image=<image>
+
+## show deployments
+kubectl get deployments [--show-labels OR -l key=value]
+
+## forward communication from your shell to the cluster network
+// (pods are running on a private isolated network)
+// can now be reached via shown ip-address, e.g. with curl (curl http://localhost:8001/version)
+kubectl proxy
+
+
+## troubleshoot
+
+## list resources
+kubectl get [e.g. pods / deployments / services] [-l <label-selector>]
+// e.g. -l app=<service-name>
+// -o wide: gives more information, e.g. for pods the IP address
+
+## detailed info
+kubectl describe [pods / deployments / services] <specific name of pod / deployment / ...>
+
+## logs from container in a pod
+kubectl logs <pod> <container>
+kubectl logs -f <pod>
+
+## check logs of container
+kubectl logs <pod-name> -c <container-name>
+
+## execute command on a container in a pod
+kubectl exec
+
+## get all pod names
+kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'
+## get node port
+kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}'
+
+## route to API of a pod
+http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/
+
+## execute command [interactively]
+kubectl exec [-it] <pod> [-c <container>] -- <command>
+kubectl exec -it api-worker-5b5d479df6-2dkm5 /bin/sh
+
+## get events
+kubectl get events [-A -o wide]
+// wide for more infos
+
+## get exposed url
+kubectl get ingress
+
+
+## expose
+
+# get service (general or yaml format)
+kubectl get svc -o wide
+kubectl get svc -o yaml
+
+# create a new service (each Pod has unique IP address which are not exposed outside cluster without a service)
+kubectl expose <name> --type="<type>" --port <port>
+// name can be deployment (deployment/<name>), service, pod, ...
+// type: ClusterIP, NodePort, LoadBalancer, or ExternalName (default ClusterIP)
+// e.g. with NodePort: make service accessible from outside the cluster using <NodeIP>:<NodePort> (set internal port with --port, get NodePort with kubectl get services, port <internal>:<external>)
+
+# apply new label
+kubectl label <object-type> <object-name> <label>
+// object: pod / service / ...
+// label e.g. version=v1
+
+# delete services
+kubectl delete service -l <label>
+
+
+## scale
+
+# get replicaset
+kubectl get rs
+
+# scale
+kubectl scale deployment <deployment> --replicas=<N>
+
+
+## update
+
+# update deployment with new image
+kubectl set image deployment <deployment> <comtainer>=<new image>
+
+# confirm update
+kubectl rollout status deployment <deployment>
+
+# rollback
+kubectl rollout undo deployment <deployment>
+
+# restart a deployment
+kubectl rollout restart deployment/<deployment>
+
+kubectl edit deployment backoffice-expose -n <namespace>

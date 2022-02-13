@@ -1,0 +1,14 @@
+#+TITLE: Binaries
+
+* Convert files to octal and other formats
+#+begin_src shell
+  od <file>
+#+end_src
+
+|            | octal format                                                  |
+| -x         | hexadecimal format                                            |
+| -w<N>      | show N bytes per line                                         |
+| -v         | don't use * for dublicated lines                              |
+| -A<format> | display byte offsets, x, o, d or n(one)                       |
+| -j <N>     | Skip initial N bytes                                          |
+| -t<format> | define format: <type>[<bytes per baseunit like float or int>] |

@@ -1,0 +1,330 @@
+#+TITLE: Git
+
+* Configuration
+
+Set variable
+#+begin_src shell
+  git config <level> <variable> <value>
+#+end_src
+
+| Level  | What         | Flag              | Saved at       |
+|--------+--------------+-------------------+----------------|
+| System | all          | --system          | /etc/gitconfig |
+| Global | current user | --global          | ~/.gitconfig   |
+| Local  | current repo | --local (default) | .git/config    |
+
+Show all configurations with filename:
+#+begin_src shell
+  git config --list --show-origin
+#+end_src
+
+Unset variable
+#+begin_src shell
+  git config <level> --unset <variable>
+#+end_src
+
+| Variable            | Value     | Description                                                  |
+|---------------------+-----------+--------------------------------------------------------------|
+| core.editor         |           |                                                              |
+| user.name           |           |                                                              |
+| user.email          |           |                                                              |
+| push.default        | upstream  | Set push default: push to upstream, instead of name-matching |
+|                     |           | (make sense if you fetch from and pull to same repo)         |
+| alias.<name>        | <command> | set alias <name> for git <command>                           |
+| color.ui            | true      | use colorful git output                                      |
+| format.pretty       | oneline   | show one line per commit in log                              |
+| merge.conflictstyle | diff3     | show conflicts with base-branch content                      |
+|                     |           | < rebase branch ¦ base = this branch >                       |
+| fetch.prune         | true      | remove stale remote trackings when fetching                  |
+
+** Ignore
+Files in repository locally: ~.git/info/exclude~
+
+** Infos
+Show root directory
+#+begin_src shell
+  git rev-parse --show-toplevel
+#+end_src
+
+* Start
+** Initialize
+#+begin_src shell
+  git init
+#+end_src
+Creates folder .git
+
+** Clone repository
+#+begin_src shell
+  git clone <path-to-repository> [<new-repo-name>]
+#+end_src
+
+* Refs
+Names for commits, saved in .git/refs/
+- branches (.git/refs/heads/)
+- tags (.git/refs/tags/) - never moves
+- remotes (.git/refs/remotes/) - read only
+
+HEAD is a symbolic references to one of the above references
+
+Revision Selection
+| <commit>~<N> | the Nth commit before <commit>                                      |
+| <commit>^<N> | the Nth parent commit of <commit>                                   |
+|              | (makes only sense for merge commits that have more than one parent) |
+
+* History
+
+** Log
+#+begin_src emacs-lisp
+  git log
+#+end_src
+
+| flag                     | description                                    |
+|--------------------------+------------------------------------------------|
+| --author=<name>          | show commits from this author                  |
+| --stat                   | show some abbreviated statistics               |
+| --pretty=oneline         | show only line per commit                      |
+| --pretty=format:<format> | use specific format, e.g. "%h - %an, %ar : %s" |
+| -p -<N>                  | show differences for last <N> commits          |
+| -n <N>                   | show last <N> commits                          |
+| --graph                  | show branching graph                           |
+| --name-status            | see which files have changed how               |
+| /<search>                | search for <search>                            |
+
+** Commit details
+Show more infomation about commit [for a specific <file>]
+#+begin_src shell
+  git show <commithash>[:<file>]
+#+end_src
+
+** Compare
+#+begin_src shell
+  git diff <commit1/branch1>[..]<commit2/branch2> 
+#+end_src
+
+| -G <searchterm> | search for term in diff |
+
+** Reflog
+Log of where yours HEAD and branch references have been
+#+begin_src shell
+  git reflog
+#+end_src
+
+* Stage and Commit
+
+** Show status
+#+begin_src shell
+  git status
+#+end_src
+
+** Stage change
+#+begin_src shell
+  git add <change>
+#+end_src
+
+| <change>       | description                                        |
+|----------------+----------------------------------------------------|
+| <pathspec>     | file(s)                                            |
+| .              | all files in current directory                     |
+| -A [.]         | whole working tree [or subtree under current path] |
+| --patch <file> | only some line of file                             |
+| -i             | interactively                                      |
+
+** Commit
+#+begin_src shell
+  git commit
+#+end_src
+
+| flags               | descriptions                                  |
+|---------------------+-----------------------------------------------|
+| -m <commit message> |                                               |
+| -a                  | commit all changes without staging them first |
+
+* Stash
+#+begin_src shell
+  git stash
+#+end_src
+
+|                    | stash changes                                                        |
+| list               | show stash                                                           |
+| show [p] stash@{N} | show Nth stash entry [with details]                                  |
+| pop                | apply last stash and delete entry (unless there is a merge conflict) |
+| apply              | apply last stash and keep entry                                 |
+
+* Modifications
+
+** Staging area
+
+*** Unstage
+Unstage a file or all
+#+begin_src shell
+  git reset [<file>]
+#+end_src
+
+*** Downgrade a file
+Change a file to version in <branch/commit> or HEAD
+#+begin_src shell
+  git checkout [<branch/commit>] -- <file>
+#+end_src
+
+** Commits
+*** Revert a commit
+Revert commit with additional revert commit
+#+begin_src shell
+  git revert <commit>
+#+end_src
+
+*** Reset to a previous commit
+Discard commits after <commitid>
+#+begin_src shell
+  git reset <commitid/branch>
+#+end_src
+
+| --soft  | changes go to stage                           |
+| --mixed | changes stay in working dir, stage is cleared |
+| --hard  | changes are deleted, stage is cleared         |
+
+*** Amend changes to last commit
+#+begin_src shell
+  git commit --amend
+#+end_src
+
+* Branches
+#+begin_src shell
+  git branch
+#+end_src
+
+| -a                       | show all branches                          |
+| <name>                   | create new branch                          |
+| -d <name>                | delete branch                              |
+| -m [<oldname>] <newname> | change name of <oldname> or current branch |
+
+** Checkout
+
+Go to branch / commit (will result in detatched head)
+#+begin_src shell
+  git checkout <branch/commit>
+#+end_src
+(previous branch: -)
+
+Create and checkout new branch from <oldbranch> or current branch
+#+begin_src shell
+  git checkout -b <newbranch> [<originbranch>]
+#+end_src
+
+** Combine
+
+*** Merge
+Merge <originbranch> into this [destination] branch
+#+begin_src shell
+  git merge [<destinationbranch>] <originbranch>
+#+end_src
+
+| --no-ff     | Force a merge commit (prevent fast-forward)         |
+| --no-commit | Perform merge but stop before creating merge commit |
+
+Return commithash where <childbranch> branches off <parentbranch>
+#+begin_src shell
+  git merge-base <childbranch> <parentbranch>
+#+end_src
+
+*** Rebase
+Rewrite history: Reset current branch to <otherbranch> and reapply all commits made in current branch
+#+begin_src shell
+  git rebase <otherbranch/commit>
+#+end_src
+
+| -i | interactively |
+
+** Compare
+
+*** Cherry
+Show only commits of this branch that are not present in otherbranch
+#+begin_src shell
+  git cherry -v <otherbranch>
+#+end_src
+order: top old, bottom new commits
+
+*** Cherrypick
+Add <commit> to current branch
+#+begin_src shell
+  git cherry-pick <commit>
+#+end_src
+
+** Other
+
+Show branches with date of last commit, sorted by this date
+#+begin_src shell
+  git for-each-ref --sort=committerdate refs/heads/ --format='%(objectname) %(commiterdate) %(refname:short)'
+#+end_src
+
+Delete all local branches except develop
+#+begin_src shell
+  git branch | grep -v "develop" | xargs git branch -D
+#+end_src
+
+* Remote
+Remote = Tracked Repository
+
+** Manage
+#+begin_src shell
+ git remote
+#+end_src
+
+|                          | show list                                             |
+| -v                       | show list with paths                                  |
+| add <name> <path>        | add remote with <name> (e.g. origin) and <path> (URL) |
+| set-url <name> <newpath> | change path                                           |
+| update <name> --prune    | update local branches by remote one (and prune)       |
+
+** Pull
+*** Update remote tracking branch
+Update remote-tracking branch of <somebranch> or current one, default <remote>=origin
+#+begin_src shell
+  git fetch [<remote>] [<somebranch>]
+#+end_src
+
+| --all | all remotes |
+
+*** Update local branch
+Update local branch with remote version (~git fetch~ + ~git merge~)
+#+begin_src shell
+  git pull [<remote>] [<somebranch>]
+#+end_src
+
+| --rebase | rebase instead of merge |
+
+** Push
+Push <branch> to <remote>
+#+begin_src shell
+  git push [<remote>] [<branch>]
+#+end_src
+
+| -u (--set-upstream) | add upstream tracking reference (to use for pulling) |
+| --force             | overwrite remote                                     |
+| --force-with-lease  | overwrite remote if history is what you rebased      |
+
+* Tags
+
+** For Releases
+Add annotated tag (with creation date, tagger name and mail, message)
+#+begin_src shell
+  git tag -a <tagname> [-m <tagging message>]
+#+end_src
+GPG-signed tag can be created with -s or -u <keyid> instead of -a
+
+** For private / temporary object labels
+#+begin_src shell
+  git tag <tagname>
+#+end_src
+
+* Patches
+
+** Create
+#+begin_src shell
+  git diff tag1..tag2 > mypatch.patch
+#+end_src
+
+** Apply
+#+begin_src shell
+  git apply mypatch.patch
+#+end_src

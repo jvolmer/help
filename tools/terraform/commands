@@ -1,0 +1,26 @@
+# initialize terraform in this directory (download needed plugins described in main.tf file)
+terraform init
+
+# view execution plan of my configuration
+terraform plan [-out=<name>]
+// -out: save this plan in file <name>
+
+# apply changes - run script (creates or updates resources and therfore file terraform.tfstate which contains the current state)
+terraform apply ["<plan-file>"] [-var '<name>=<value>']
+// apply plan
+
+# inspect current state
+terraform show
+
+# see list of resources I created with terraform
+terraform state list
+
+# show output you defined in tf script with output
+terraform output [<var-name>]
+
+# remove infrastructure from my Azure cloud account
+terraform destroy
+
+terraform workspace select <workspace>
+
+terraform workspace list

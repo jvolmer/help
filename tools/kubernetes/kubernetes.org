@@ -1,0 +1,270 @@
+#+TITLE: Kubernetes
+
+Open Source Standard for container orchestration
+
+Independent of operating system or plattform
+
+There are different engines, e.g. Amazon EKS, Azure Kubernetes Service (AKS), Google Kubernetes Engine, Rancher Kubernetes Engine
+
+Different Elements (kinds) are involved, each one is a resource  and can managed like this via terraform
+
+Everything has labels, they are used to identify stuff
+
+Kubernetes Yaml
+#+begin_src terraform
+  
+  kind: string
+  apiVersion: string (opt)
+  metadata: {
+    name: string
+    namespace:string (opt)
+    labels: map(string, string) (opt)
+    annotations: map(string, string) (opt)
+  }
+  spec: { } # depends welche ressource }
+  
+#+end_src
+
+Terraform  (example) translation
+#+begin_src terraform
+  
+  resource "kubernetes_KIND" "terraform_name" {
+    metadata {
+      name = "kubernetes-name"
+      namespace = "namespace"
+      labels: {
+        app = "my-app",
+        tier = "api"
+      }
+    }
+    spec { ... } // depends on kind
+  }
+  
+#+end_src
+
+* Konfigurations
+
+Command tool: =kubectl=
+
+~./kube/config (wird vom cloud provider bereitgestellt) ist sensibel
+
+[[https://admin.cluster.lise.de][Auf unserem Rancher]]
+
+* Elements / Kinds
+
+** Pods
+
+Smallest possible unit
+
+Includes: Container + Ports + Environments + Volumes (meistens nur einer und nicht mehrere Container)
+
+Aufgabe 3
+
+** Deployment
+
+Is responsible that pods are running all the time
+
+kind: Deployment
+selector: Labels (guckt alles paar Sekunden auf alle Pods und sucht die mit selectors heraus und checked ob das noch genug sind; dublicate von labels im template)
+template: Blueprint um neuen Pods zu erzeugen
+
+#+begin_src terraform
+  
+  locals {
+    default_labels = {
+      app = "quoted"
+      tier = "backend"
+    }
+  }  
+  
+  # is configured once in main (not in modules)
+  provider "kubernetes" { # nutzt kube/config
+    config_path = "~/.kube/config"
+    config_context = "lise-internal"
+  }
+  
+  resource "kubernetes_deployment" "backend_deployment" {
+    metadata {
+      name = "backend-deployment"
+      namespace = "namespace"
+      labels: local.default_labels
+    }
+    spec {
+      selector {
+        match_labels = local.default_labels
+      }
+      template {
+        metadata {
+          labels = local.default_labels
+        }
+        spec {
+          # was hier reinkommt kann man in terraform registry sehen
+          container = {
+            name = "backend"
+            image = "docker.cluster.lise.de/infrastructure-workshop-backend:latest"
+            env {
+              name = "SPRING_DATA_MONGODB_HOST"
+              value = var.mongodb_host
+            }
+            env {
+              name = "SPRING_DATA_MONGODB_DATABASE"
+              value = var.mongodb_database
+            }
+            env {
+              name = "SPRING_DATA_MONGODB_USERNAME"
+              value = var.mongo_db_usename
+            }
+            #password env
+            port {
+              container_port = 80 # port in container
+              name = "http"
+            }
+            liveness_probe {
+              # optional, how to know that container is still running, often helpful
+              http_get {
+                path = "/api/quotes"  # with answer 200 without authentication (health)
+                port = "http"
+              }
+              failure_threshold = 5 # after 5 failures restart pod
+              initial_delay_seconds = 10 # nach 10 sek
+              period_seconds = 1 # frage jede sekunde
+            }
+            resources { # optional
+              requests {
+                memory = "100Gi" # can be good to know for kubernetes scheduling
+              }
+              limits {
+                memory = "100mi" # hard limit, 
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+#+end_src
+
+Pro Container ein Deployment
+
+Refactoring: oft variablen fuer namespace, docker_tag; locals fuer labels
+
+Aufgabe 3
+
+** Service
+
+Um pods innerhalb des Clusters erreichbar machen
+Verteilt Anfragen  an healthy pods mit selector labels
+
+kind: Service
+name: frontend
+namespace: demo
+selector:
+type: ? (meist cluster_ip)
+
+Bekommt automatisch DNS namen - Name des Service host-name http://backend
+Servicename is DNS-name im selben namespace
+In anderem namespace service.zielnamespace.svc.cluster.local (muss soviel angeben wie benoetigt wird)
+
+Aufgabe 4
+
+** Ingress
+
+Anwendung soll von aussen unter Domain per HTTP erreichbar sein
+
+kind: Ingress
+name:app-ingress
+namespace:
+rules:
+- host: 
+   http:
+     paths:
+     - backend:
+         serviceName: frontend
+         servicePort: 80
+     - backend:
+         serviceName: backend
+         servicePort: 8080
+       path: /api 
+
+#+begin_src terraform
+  
+  resource "kubernetes_service" "frontend" { # nur kombination aus beiden muss eindeutig sein
+    metadata {
+      name = "frontend"
+      namespace = var.namespace
+      labels = local.default_labels
+    }
+    spec {
+      type = "ClusterIP" # meistens
+      selector = kubernetes_deployment.frontend.spec[0].template[0].metadata[0].labels
+      # ganz gut hier anhaengigkeit explizit zu machen (kann man auch mit depends_on angeben)
+      # kommt drauf an wie lesbar noch ist
+      port {
+        port = 80 # service lauscht darauf
+        target_port = "http" # container port
+        name = "http" # regelfall wie target_port
+      }
+    }
+  }
+  
+#+end_src
+  
+#+begin_src terraform
+  
+  
+  resource "kubernetes_ingress" "quoted" {
+    metadata {
+      name = "application-ingress"
+      namespace = var.namespace # kein default
+      labels = {
+        app = "quoted"
+      }
+    }
+    spec {
+      rule {
+        host = "dein-name.infraworkshop.cluster.lise.de"
+        # frei waehlbar fuer VPN waehlbar: *.cluster.lise.de
+        http {
+          path { # rule path
+            path = "/api" # http path
+            backend {
+              service_name = var.backend_service_name # am besten aus modules output
+              service_port = var.backend_service_port
+            }
+          }
+          path { # den rest
+            backend {
+              service_name = var.frontend_service_name
+              service_port = var.frontend_service_port
+            }
+          }
+        }
+    }
+  }
+  
+  #+end_src
+  
+Tieferliegende dinge funktionieren nicht mit ingress
+
+Aufgabe 4
+
+** Volumes
+
+Persistent Volume Claims
+
+In Pod spec:
+Volumes Block
+Im Container def einhaengen mit gleichem Namen
+
+Test: einmal container neu starten
+
+* Weiteres
+
+- secrets
+- config maps (aehnlich wie secrets aber weniger confidential), z.B. an pfad mounten
+- autoscalers
+- healthchecks
+- cronjobs
+- helm (aehnlich zu apt): kennt terraform nicht, eigener state konkurriert daher manchmal mit terraform state
+  Wir nutzen helm nur fuer rabbit mq weil das etwas komplizierter aufzusetzen ist

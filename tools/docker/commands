@@ -1,0 +1,131 @@
+## images
+
+# search for images on DockerHub
+docker search <image name>
+
+# pull image from DockerHub
+docker pull <image>
+
+# show images that have been downloaded
+docker images
+
+# remove image
+docker image rm <name>
+
+# run image (and download if not there yet) interactively
+docker run [--name "<name>"] -it <image>
+# run container in background (detached)
+docker run -d <image>
+
+# create new image from source code (Dockerfile)
+docker build [--no-cache] [-f <dockerfile directory>] <context directory>
+// [-t] to flag image 
+
+# show image layers
+docker image history [--no-trunc] <image>
+
+### containers
+
+
+# create new container from images and prepares to run it
+docker create
+
+#creates container and runs it (combination of docker create and docker start)
+docker run <flags> <image> <command run in container>
+// [-e NAME=value] define environment variable
+// for production: put environment vars used to set connection settings in a file (use envvar with suffix _FILE)
+
+# show active [or all] containers
+docker ps [-a]
+
+# show lastest container created
+docker ps -l
+
+# show only names of all running containers (you can use any columnname)
+docker ps --format '{{.Names}}'
+
+# start container
+docker start <container id/name>
+
+# stop container
+docker stop <id/name>
+
+# access running container via bash
+docker exec -it <id/name> bash
+
+# remove container
+docker rm <id/name>
+// [-f] stops and removes container
+
+# commit container to image (repository: dockerHub username)
+docker commit -m "<message>" -a "<author name>" <container id> <repository>/<new image name>
+
+# give logs of container
+docker logs -f <id>
+
+
+### push image to docker repository
+
+# log into DockerHub
+docker login -u <docker registry name>
+
+# if <repository> != <docker registry username>
+docker tag <repository>/<new image name> <docker registry username>/<new image name>
+
+# push image
+docker push <docker registry username>/<image name>
+
+
+# communication with outside
+
+# create container with running mySQL-DB
+(container port of db is give in /etc/mysql/my.cnf)
+docker run -d -p <hostPort>:<containerPort> -e MYSQL_ROOT_PASSWORD=<new password> [--name <new container name>] <image>
+
+# find IP address that has been assigned to the container
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <container name>
+
+
+####### volumes ########
+
+# create named volume (managed by docker)
+docker volume create <name>
+
+# run container with volume mounted at <path> in container (e.g. directory in which db lies)
+(if <volumne-name> was not created before, docker will do this automatically)
+docker run -dp 3000:3000 -v <volumne-name>:<path> <image>
+
+# inspect volumne (see e.g. where it is saved)
+docker volume inspect <name>
+
+# create bind mount (to provide additional data into container,
+e.g. to mount source code into container, see code changes with a tool that is running in container, for node.js this can be nodemon)
+docker run -dp 3000:3000 -w <workdirectory> -v "<host path>:<container path>" <image> sh -c <command to install packages and run filesystem watcher>
+// -w sets the “working directory” or the current directory that the command will run from
+
+
+####### networks #######
+If two containers are on the same network, they can talk to each other. If they aren’t, they can’t.
+
+# create network
+docker network create <name>
+
+# start container that attaches to network
+docker run -d --network <name> --network-alias <alias> <image>
+// <alias> is alias for host ip address of this container
+
+
+####### docker-compose ########
+
+# start application stack (defined in docker-compose.yml file)
+docker-compose up -d
+
+# see logs
+docker-compose logs [-f] [<service>]
+// -f follow
+// <serivce> show only logs of specific service
+
+# tear it down
+# stop containers and remove network
+docker-compose down [--volumes]
+// --volumes removes volumes

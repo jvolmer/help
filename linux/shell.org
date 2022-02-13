@@ -29,3 +29,50 @@ Check if file exists
   fi
 #+end_src
 
+** Usage Tipps
+
+*** Quotes
+Single quotes: preserve literal value of each character
+Double quotes: preserve literal value of each character except of $, `, \ and possibly !. * and @ have special meanings. Ignore wildcards
+
+*** Execute commands
+
+Give <command> in ascii (can use \t or \n or \U... for utf-8)
+#+begin_src bash
+  $'<command>'
+#+end_src
+
+Execute command <command>, writes it to stdout and puts this again into shell
+#+begin_src bash
+  $(<command>) or `<command>`
+#+end_src
+
+Shifts <input> into standardinput of <command>
+#+begin_src bash
+  <command> <<< <input>
+#+end_src
+
+*** Variable Scope
+Export variable such that they are available (inherited by) other programs run by the shell that exports them (environment vars)
+#+begin_src bash
+ export <var> 
+#+end_src
+
+Define assignement only for following command
+#+begin_src bash
+ <assignement> <command>
+#+end_src
+
+*** Executing files
+At start of file define which command to execute. Will give filename to this command as first parameter
+#+begin_src bash
+  #!<command>
+#+end_src
+
+*** Copy and paste
+Copy from shell to clipboard selection (has to be marked by mouse)
+C-S-c
+
+Paste clipboard selection to shell
+C-S-v
+S-Insert

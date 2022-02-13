@@ -47,3 +47,16 @@ Enable device that is blocked
 #+begin_src shell
   rfkill unblock <device number>
 #+end_src
+
+** Drives
+List devices
+#+begin_src shell
+  lsblk  # OR
+  sudo blkid
+#+end_src
+
+Write to drive
+#+begin_src shell
+  sudo dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd...)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>]
+#+end_src
+

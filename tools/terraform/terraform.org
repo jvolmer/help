@@ -1,0 +1,237 @@
+#+TITLE: Terraform
+
+With terraform I define the desired state of the infrastructure.
+
+Every implementation depends on the providers I am using, they will do the actions needed to reach the desired state.
+
+All things that are defined in terraform scripts will be managed by it (manual changes will be overwritten when terraform is again applyed afterwards).
+
+Starts stuff as it depends on each other.
+
+** Registry
+
+Was genau rein geht und raus geht an resource ist sehr unterschiedlich, siehe [[https://registry.terraform.io][Registry]]
+
+** Dokus
+- [[https://www.terraform.io/docs/language/][Terraform Language Syntax]]
+- [[https://registry.terraform.io/][Terraform Registry]] (Provider und Ressources)
+- Spezifische Provider und Ressourcen Dokus (Spezifisch, z.B. Input und Output von Ressourcen)
+
+** State
+
+Terraform has a state, which is saved in .tfstate. This state should be saved somewhere where it is reachable for everybody working with terraform.
+
+Ist sensible, da koennen Passwoerter drin stehen
+Am besten State verschluesselt ablegen
+
+** Types
+
+port  { } (ohne = ) ist eine liste, kann also port {} port {} sein
+
+** Blocks
+
+*** Provider
+
+Provider wissen wie ressourcen angelegt werden.
+
+Sind da um Sachen zu verwalten, aber nicht zu erstellen - z.B. keycloak, kubernetes
+So wie Provider heisst, das muss es schon geben
+
+Bei Community Providern muss ich Konfiguration hinzufuegen (Best Practice: immer hinzufuegen) ,z.b.
+#+begin_src terraform
+  
+  terraform {
+    required_providers {
+      mysql = {
+        source = "winebarrel/mysql"
+        version = "1.10.4"
+      }
+    }
+  }
+  
+  provider "mysql" {
+    # Configuration options
+  }
+  
+#+end_src
+
+~terraform init~ Laed provider
+
+*** Resources
+
+resource: Resource terraform manages for me
+~resource <type> <tf-name>~
+- =<type>= - naming convention <provider>_<spezielle ressource>
+- =<tf-name>= -  only name used to reference ressource in tf-scripts
+
+  #+begin_src terraform
+  
+  resource "docker_container" "my_webapp" {
+    name = "webapp" # name for deployed resource (name of container)
+    image = "testapp:1.0.0"
+    env = [
+      "API-TOKEN=${random_password.api_token.result}"
+    ]
+  }
+  
+  resource "random_password" "api_token" {
+    length = 32
+  }
+  
+#+end_src
+
+*** Data
+
+Etwas existiert schon, bekomme daten davon (Similar to resource but read only)
+
+#+begin_src terraform
+  
+  data "kubernetes_deployment" "backend_deployment" {
+    name = "backend-deployment" # suche diese eigenschaft
+  }
+  
+#+end_src
+
+nutzbar mit data.kubernetes_namespace. ...
+
+z.B. fuer secrets
+https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret
+
+*** Variables
+
+Are globally available throughout the folder
+
+If they are not given and no default is defined, terraform will ask for them when applying, description is shown there
+
+#+begin_src terraform
+  
+  variable "docker_tag" {
+    type = string
+    // default = 1.0.0
+    // description = "What is the docker tag"
+  }
+  
+  resource "docker_container" "my_webapp" {
+    name = "webapp" # name for deployed resource (name of container)
+    image = "testapp:${var.docker_tag}"
+  }
+  
+#+end_src
+
+*** Locals
+
+Local constants
+
+#+begin_src terraform
+  
+  locals {
+    filename_prefix = "abc"
+  }
+  
+#+end_src
+
+use with ${local.filename_prefix}
+
+*** Output
+
+koennen als variablen in anderen kontexten genutzt werden
+
+Use ~sensitive~ fuer passwoerter: werden nicht ausgegeben
+
+*** Modules
+
+One folder is a module
+
+All vars defined in it can be given to it
+
+Could also come from registry (community modules)
+
+Are included via
+#+begin_src terraform
+  
+  module "name" {
+    source = "..." # relative path from here
+    # variables of this module
+  }
+  
+#+end_src
+
+
+** Terraform file schreiben
+
+neuer Ordner ~infrastructure~
+dadrunter: ~environments~: test und prod sind (1 Environment, 2 Umgebungen), aber wenn eins auf aws eins auf ... betreiben will, sind das mehrere environments
+Hauptskript: ~main.tf~
+
+*** Konventionen
+variablen nach oben, output nach unten
+main ist einstiegspunkt
+labels: app, tier
+
+*** Vorgehen
+- Registry: suchen was gewuenscht ist
+- Kopiere Konfiguration (nicht noetig wenn direkt von Hashicorp, aber auch dann expliziter) und Provider
+
+  #+begin_src terraform
+    
+    terraform {
+      required_providers {
+        local = {
+          version = "2.1.0"
+          source = "hashicorp/local"
+        }
+      }
+    }
+    
+    provider "local" {}
+    
+    variable "anzahl" {
+      type = string
+      description = "Wieviele Dateien angelegt werden sollen"
+    }
+    
+    resource "local_file" "mein_file" {
+      # hier muessen nur required attribute rein
+      filename = "blabla.txt"
+      content = "Hallo Welt!"
+      # default attribute
+      count = var.anzahl
+    }
+    
+    # ist abhaengig von "mein_file"
+    resource "local_file" "mein_file_2" {
+      filename = "bla2.txt"
+      content = "Hallo Welt123! ${local_file.mein_file.directory_permission} ${local_file.mein_file.filename}"
+    }
+    
+    
+  #+end_src
+
+** Usage
+
+#+begin_src shell
+  
+  # provider runterladen (schadet nicht)
+  terraform init
+  
+  # anwenden
+  terraform apply [--var="anzahl=4"] [--auto-approve]
+  
+  # loesche alles
+  terraform destroy
+  
+#+end_src
+
+** Workspaces
+
+Workspace: Unterschiedliche Instanzen managen
+
+#+begin_src terraform
+  
+  terraform workspace new test
+  
+#+end_src
+in ${terraform.workspace}
+
+Kreiert fuer jeden workspace eigenen state file (Workspace is praefix fuer state)
+

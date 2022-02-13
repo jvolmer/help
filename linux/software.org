@@ -9,6 +9,11 @@
   apt list
 #+end_src
 
+Give all installed programs that include some string
+#+begin_src shell
+  dpkg -l | grep -Fi <string>
+#+end_src
+
 ** Install
 #+begin_src shell
   apt install

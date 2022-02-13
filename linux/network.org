@@ -41,3 +41,18 @@ Send mail
 ** Sniff data from connection
 that is received on <port>
 =tcpdump port <port> –w dump.txt=
+
+** Listen
+#+begin_src shell
+  nc localhost <port>
+#+end_src
+
+** Lookup
+#+begin_src shell
+  nslookup localhost
+#+end_src
+
+** Lookup ip address for <hostname>
+#+begin_src shell
+  dig <hostname>
+#+end_src

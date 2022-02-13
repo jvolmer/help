@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  app:
+    # serice name = network alias
+    image: node:12-alpine
+    command: sh -c "yarn install && yarn run dev"
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      # bind mount volume
+      - ./:/app
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: todos
+
+  # equivalent to:
+  # docker run -dp 3000:3000 \
+  #   -w /app -v "$(pwd):/app" \
+  #   --network todo-app \
+  #   -e MYSQL_HOST=mysql \
+  #   -e MYSQL_USER=root \
+  #   -e MYSQL_PASSWORD=secret \
+  #   -e MYSQL_DB=todos \
+  #   node:12-alpine \
+  #   sh -c "yarn install && yarn run dev"
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      # named volume
+      - todo-mysql-data:/var/lib/mysql
+      # you can also just write - /var/lib/mysql and let docker create a volume for you
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: todos
+      
+volumes:
+  todo-mysql-data:
+
+  # has to be defined because it is not created automatically
+
+  # equivalent to:
+  # docker run -d \
+  #   --network todo-app --network-alias mysql \
+  #   -v todo-mysql-data:/var/lib/mysql \
+  #   -e MYSQL_ROOT_PASSWORD=secret \
+  #   -e MYSQL_DATABASE=todos \
+  #   mysql:5.7

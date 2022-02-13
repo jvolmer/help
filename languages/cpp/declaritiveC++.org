@@ -1,0 +1,90 @@
+#+TITLE: Declaritive C++ - Ben Deane
+
+Easy to use: Composition
+Hard to misuse: Make types work for you
+
+* Assignement: Core guidelines
+- By default, make objects immutable
+- Use const to define objects with valus that do not change aft construction
+- Don't introduce a variable (or constant) before you need to use it
+- Don't declare a variable until ou have a value to initialize it with
+- Use lambdas for complex initialization
+
+* Functions
+- no raw loops
+- turn statements into expressions
+- give expressions names
+- encapsulate conditions
+- are the optimizer's bread and butter
+
+* Conditions
+- encapsulate in functions
+- move them up to the point where it is actually used - polymorphism helps with that
+
+* OO Pattern for declarative style
+** Null object
+due to polymorphism: pushing condition up the callstack
+** Command
+** Composite
+**  Builder
+works well when
+- you have a single verb(then, set_field)
+- you'll be building objects a lot
+- you can make types work for you (e.g. required fields in type via templates)
+- rvalues aren't too verbose
+
+* Composibility
+Use ranges, similar to pipes in terminal
+Readability is familarity
+Declaritive code (saying WHAT instead of HOW) is more likely to remain robust
+
+* Operator Overloading
+- operators communicate properties
+- make sense for binary functions
+- should be conventional
+- identify your monoids: associative, bclosed, commutative, identity
+  
+* Overloads and Templates
+parametric polymorphism: enable use of functions without conditionals
+let the compiler do the right thing
+
+* Guidelines for declarative code
+avoid writing statements, principally control-flow and assignment
+** Replacing Conditionals
+*** For different styles
+- Imperative (Statements) -> multi-computation
+- OO (Object construction) -> Polymorphism
+- Functional (function call) -> higher-order function
+- Generic (Type instantiation) -> trait class
+*** Push conditionals down the callstack
+- intrinsic to data structures
+- optional/monadic interface
+- handle at leaf, don't leak
+*** Push onditionals up the callstack
+- dependency injection
+- higher-order functions
+- power to the caller
+- lifted to rrot, abstracted
+*** Goal: total functions
+** Replacing Loops
+No raw loops: encapsulate and replace iteration and jumps
+** Replace Assignments
+*** Declare at use
+- use I+LEs
+- leverage const
+- use AAA-style (almost always auto) if you like
+*** Overload operators for declarative power
+** If you can't avoid statements
+- nodiscard attribute
+- if-initilizer
+- static analysis
+** Declarative interfaces
+- dependency injection
+- higher-order functions
+- builder pattern / fluent style
+- identify monoids
+- start with composition
+** Declarative Goals
+- expressions over statements
+- declarations over assignments
+- unconditional code

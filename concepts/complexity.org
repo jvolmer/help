@@ -1,0 +1,32 @@
+#+TITLE: Complexity
+
+Essential complexity: inherent to the domain
+Accidental complexity: introduced by developers by making choices that incidentally make our lives worse (larger part)
+
+* Accidental complexity
+
+• Dynamic types (aka values can become any type)
+
+• NULL instead of values (we already discussed this one)
+
+• Distributed logic (aka missing abstraction)
+
+• Coupling without cohesion (aka coupling of unrelated things or things that are used in different contexts)
+
+• Impure functions (aka logic with side-effects)
+
+• Unconstrained construction (aka allowing for illegal program states)
+
+• Primitive obsession (aka using primitive instead of domain types)
+
+• Mutability (aka the "moving parts")
+
+• Temporal coupling (aka coupling through side-effects)
+
+• Implementation inheritance (aka reusing code by "inheritance")
+
+• Global accessibility (aka ignoring encapsulation and hiding dependencies)
+
+• Conditional logic (aka control-flow via if- and loop-statements)
+
+• Exceptions as control-flow (aka the hidden control-flow breaking the principle of least astonishment)

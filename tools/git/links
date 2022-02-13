@@ -1,1 +1,22 @@
+# branching
 https://learngitbranching.js.org
+
+# workflow
+https://nvie.com/posts/a-successful-git-branching-model/
+https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
+https://www.endoflineblog.com/oneflow-a-git-branching-model-and-workflow
+
+# rewriting history
+https://www.atlassian.com/git/tutorials/rewriting-history#git-rebase-i
+
+# git katas
+http://blog.schauderhaft.de/gitkata/
+https://github.com/andrej-dyck/git-kata
+
+# git talks
+https://www.youtube.com/watch?v=yCh6TSLIQBQ
+https://www.youtube.com/watch?v=Dv8I_kfrFWw
+https://www.youtube.com/watch?v=FfaGUy-l1rs&feature=youtu.be
+
+# no rebase??
+https://medium.com/@fredrikmorken/why-you-should-stop-using-git-rebase-5552bee4fed1
