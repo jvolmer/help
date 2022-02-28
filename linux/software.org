@@ -1,5 +1,10 @@
 #+TITLE: Software
 
+* Linux version
+#+begin_src shell
+  lsb_release -a
+#+end_src
+
 * Installing software with apt
 
 ** Find

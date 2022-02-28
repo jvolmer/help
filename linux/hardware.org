@@ -1,9 +1,5 @@
 * Hardware
 
-# Get to know which GPU is used:
-lspci | grep VGA
-lspci -v -s <ID(xx:xx.x) you got from line above>
-
 Get MAC number via
 #+begin_src shell
   ifconfig
@@ -51,12 +47,24 @@ Enable device that is blocked
 ** Drives
 List devices
 #+begin_src shell
-  lsblk  # OR
+  lsblk [-f] # OR
   sudo blkid
+#+end_src
+=-f= gives device name
+
+Get more detailed information
+#+begin_src shell
+  sudo fdisk -l
+#+end_src
+
+Mount device
+#+begin_src shell
+  sudo mount /dev/sd<?> <mountpoint>
 #+end_src
 
 Write to drive
 #+begin_src shell
-  sudo dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd...)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>]
+  sudo umount <device via /dev/sd<?><?> or name>
+  sudo dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd<?>)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>]
 #+end_src
 

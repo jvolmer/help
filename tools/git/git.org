@@ -31,7 +31,6 @@ Unset variable
 | push.default        | upstream  | Set push default: push to upstream, instead of name-matching |
 |                     |           | (make sense if you fetch from and pull to same repo)         |
 | alias.<name>        | <command> | set alias <name> for git <command>                           |
-| color.ui            | true      | use colorful git output                                      |
 | format.pretty       | oneline   | show one line per commit in log                              |
 | merge.conflictstyle | diff3     | show conflicts with base-branch content                      |
 |                     |           | < rebase branch ¦ base = this branch >                       |
