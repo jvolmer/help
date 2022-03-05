@@ -1,0 +1,25 @@
+#+TITLE:SSH
+
+* Generate a key
+#+begin_src shell
+  ssh-keygen -t ed25519 -C "<email>"
+#+end_src
+For legacy systems you can use the rsa algorithm.
+
+* ssh-agent
+Keeps track of the user's identity keys and their passphrases. After adding an identity, ssh-agent asks for the identity's passphrase and stores it in memory. When the passphrase is needed, ssh-agent will provided it.
+
+Start it (should already be running on Linux)
+#+begin_src shell
+  eval `ssh-agent`
+#+end_src
+
+Do stuff
+#+begin_src shell
+  ssh-add
+#+end_src
+| <private-key-path> | add identity                                     |
+| -l                 | list fingerprints of all identities              |
+| -L                 | list all public key parameters of all identities |
+| -D                 | delete all identities                            |
+

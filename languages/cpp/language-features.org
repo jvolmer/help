@@ -62,8 +62,11 @@ Shows error with TYPE;
 ** Assert
 
 #+begin_src cpp
-  
+  #include <type_traits> 
+
   static_assert(std::is_same_v<EXPECTED_TYPE, REAL_TYPE>);
+  // e.g.
+  static_assert(std::is_same_v(decltype(a), int>);
 
   #+end_src
 
@@ -182,7 +185,17 @@ Better readability if you directly want to invoke lambda (otherwise there will b
 
 Here, everything in the scope is captured with ~[&]~.
 
-* r-values (prvalue = pure rvalue)
+* r-values (prvalue = pure rvalue): Type of an expression
+rvalue references are similar to lvalue references but can only refer to temporary objects that do not have a name or to objects that are marked with ~std::move~
+
+#+begin_src cpp
+
+  std::string& s1{...};  // lvalue reference
+  std::string&& s1{...}; // rvalue reference
+
+#+end_src
+
+const rvalue references are not useful because you actually want to transfer ownership with them. if you no need the moved object any more, you might as well be able to modify it. or if you don't want to be able to change it, why not use a const rvalue reference.
 
 ** Usage
 
@@ -201,6 +214,21 @@ Here, everything in the scope is captured with ~[&]~.
 #+end_src
 
 If for some reason it looks like an lvalue, it is an lvalue.
+
+Expression consisting of only a variable is always an lvalue
+#+begin_src cpp
+
+  void bar(int a, int& b, int&& c) {
+    static_assert(std::is_same_v<decltype(a), int>);
+    static_assert(std::is_same_v<decltype(b), int&>);
+    static_assert(std::is_same_v<decltype(c), int&&>);
+
+    static_assert(std::is_same_v<decltype((a)), int&>);
+    static_assert(std::is_same_v<decltype((b)), int&>);
+    static_assert(std::is_same_v<decltype((c)), int&>);
+  }
+  
+#+end_src
 
 ** Constructor and assignment definition
 
@@ -227,15 +255,117 @@ If you specify one constructor, then you want to specify the others as well
   
 #+end_src
 
-** Effective usage of ~std::move~
+If class does not provide move constructor, the copy constructor is used.
+If the move constructor exists and you return a value from a function, the move constructor is used instead of the copy constructor.
 
+*** Some notes
+**** copy constructor
+non-const reference input is highly suspect - should not be used, you actually don't want to change but only copy the input
+**** move constructor
+gives compiler the option to move the given object around
+
+*** Rule of Five
+The compiler can automatically generate six different special member functions:
+- default constructor
+- destructor (user defined only makes sense for virtual destructor)
+- copy constructor
+- copy assignment operator
+- move constructor
+- move assignment operator
+Some of these are generated only if certain preconditions are fulfilled: If you declare some of these functions explicitly (also means to just declare to use the default), this can prevent other functions to be generated automatically
+
+Left: User declares (also if just declared as default)
+Top: forces
+|            | default c  | copy c  | copy a  | move c     | move a     | destructor |
+|------------+------------+---------+---------+------------+------------+------------|
+| nothing    | default    | default | default | default    | default    | default    |
+| any c      | undeclared | default | default | default    | default    | default    |
+| default c  | user       | default | default | default    | default    | default    |
+| copy c     | undeclared | user    | default | fallback   | fallback   | default    |
+| copy a     | default    | default | user    | fallback   | fallback   | default    |
+| move c     | undeclared | deleted | deleted | user       | undeclared | default    |
+| move a     | default    | deleted | deleted | undeclared | user       | default    |
+| destructor | default    | default | default | fallback   | fallback   | user       |
+fallback: undeclared but fallbacks to copy
+default constructor is Foo()
+
+When you declare one of them, think about the impact this has on the other special member functions. Don't necessary declare all of them because if you delete one explicitly, it cannot use the fallback (applies to move functions).
+
+** ~std::move~
+~ auto b = std::move(a)~ does express that I no longer need a, but moves ownership of its value to b (unfortunately in C++, you can still use a - its lifetime does not end as in Rust - but its value is unspecified)
+std::move just converts an lvalue into an rvalue reference. After we we do something with this rvalue, the original lvalue can change as well. (There are some objects that have a specified state after a move)
+#+begin_src cpp
+
+  std::string a = "Hallo";
+  std::string b {std::move(5)};  // now a and b will look the same
+  bar(b);  // after that, it is not clear which value a has
+           // but it will be in a valid state though and you can continue to use it
+  a = "New"; // now a == "New" and b == "Hallo"
+
+#+end_src
+Continue using value of a after move is possible but should be avoided! Possibly clang-tidy will warn you about it but not the compiler.
+
+Expression that is just the name of a variable returns an lvalue, therefore move semantics is not passed through
+#+begin_src cpp
+
+  struct SomeStruct {
+    SomeStruct(SomeStruct const&) {} // copy constructor
+    SomeStruct(SomeStruct&&) {}      // move constructor
+  };
+
+  void by_value(SomeStruct f);
+
+  void by_rvalue_ref(SomeStruct&& f) {
+    by_value(f);            // f is lvalue! calls copy constructor
+    by_value(std::move(f)); // calls move constructor
+  }
+
+#+end_src
+
+*** Examples
+#+begin_src cpp
+
+  std::string s = "Hello";
+  std::string& r1 = s;
+  std::string&& r2 = std::move(s); // is just a reference
+                                   // (r2 is still an lvalue because it has a name)
+
+  r1 += " World";
+  r2 += "!";
+
+  std::cout << s << std::endl;   // Hello World!
+  std::cout << r1 << std::endl;  // Hello World!
+  std::cout << r2 << std::endl;  // Hello World!
+
+  s = "New";
+  std::cout << s << std::endl;   // New
+  std::cout << r1 << std::endl;  // New
+  std::cout << r2 << std::endl;  // New
+
+#+end_src
+
+#+begin_src cpp
+
+  std::string s = "Hello";
+  std::string& r1 = s;
+  std::string r2 = std::move(s);
+
+  r1 += " World"; // Here we actually change s, but s is in an unspecified state
+  r2 += "!";
+
+  std::cout << s << std::endl;   //  World // for used compiler s is set to "" after move
+  std::cout << r1 << std::endl;  //  World // but could be behave differently
+  std::cout << r2 << std::endl;  // Hello!
+
+#+end_src
+
+*** Effective usage:
 #+begin_src cpp
   
   struct X {
     // best way to write a constructor for both r- and l-value reference
     X(std::vector<int> arg) : _data(std::move(arg)) {}
    // also use this method for a setter
-  
   
     // move optimization (but becomes cumbersome for more than one for construcotr)
     X(std::vector<int> const &arg) : _data(arg) {} // dont move
@@ -250,7 +380,6 @@ If you specify one constructor, then you want to specify the others as well
     
 #+end_src
 
-What happens to moved object (here ~v~) is dependent on what move did. Should be: Object should have a valid state but it is not clear what is inside it.
 
 #+begin_src cpp
   
@@ -260,7 +389,38 @@ What happens to moved object (here ~v~) is dependent on what move did. Should be
   
 #+end_src
 
-* Universal forwarding: Universal / Forwarding reference
+* Perfect forwarding
+
+Move semantics is not passed through.
+
+#+begin_src cpp
+
+  template <class T>
+  void callFoo(T&& arg) {
+    foo(std::forward<T>(arg));
+  }
+
+#+end_src
+Is a conditional move: arg is rvalue we call foo(std::move(arg)), arg is lvalue we call foo(arg). Preserves type including constness and value category.
+
+Similar to std::move, std::forward means: I no longer need this value - although it is only moved in some cases
+
+e.g.
+#+begin_src cpp
+
+  template<class T>
+  void foo(T&& t) {
+    auto tt = std::forward<T>(t);
+  }
+
+#+end_src
+Creates a copy of t only if you give it a reference
+
+* Universal forwarding: Universal or Forwarding reference (is the same)
+
+A forwarding reference is an rvalue reference to a (cv-unqualified - means no volatile or const) template parameter that does not represent a template parameter of a class template.
+
+&& can mean lvalue reference or rvalue reference, applies basically to template paramters and auto
 
 #+begin_src cpp
   
@@ -315,3 +475,182 @@ Usage of lambda inheritance
     }, intOrFloat);
   
 #+end_src
+
+* Attributes
+Should not change the behavior (if you use them correctly) but are suggestions (are not enforced) for the compiler. They are compiler specific
+gcc: __attribute__((<attribute>))
+Since C++11 =[[<attribute>]]
+
+alignas(N) is a special attribute because it can change behavior and it is enforced. It specifies the alignment requirement which is the number of bytes between successive addresses at which objects of this type can be allocated. N has to be a power of 2.
+
+** Relevant ones
+- noreturn: function that never returns, e.g. std::abort, std::exit, std::terminate, std::rethrow_exception, std::longjmp. If function actually returns something this produces undefined behavior
+- deprecated: generates a warning when deprecated object is used. Message can be added
+- fallthrough: In switch-case indicates that fallthrough from previous case (e.g. no break or return) is intentional
+- maybe_unused: suggests to suppress warnings if particular value may be unused during its lifetime, e.g. if an assert is compiled away in release
+-  
+
+* Class template argument deduction
+
+#+begin_src cpp
+  template<typename T>
+  struct X {
+    X(T t);
+  };
+
+  auto ax = X(1);
+#+end_src
+Converts function into templated function (can also template class and class, will convert that)
+
+#+begin_src cpp
+  template<typename T>
+  struct X {
+    constexpr X(T t) {}; // has to be a literal - constexpr
+  };
+
+  template<X x> struct Y {};
+  auto ax = Y<0>();
+#+end_src
+
+Deduction guide
+#+begin_src cpp
+  template<typename T>
+  struct S {
+    S(T t);
+  };
+
+  //deduction guide
+  S(const char*) -> S<std::string>;
+
+  auto s = S("Hello world");
+#+end_src
+constructor -> type
+most explicit more specific deduction wins
+
+std::decay_t<F> strips everything from type, e.g. string&->string, vec* -> vec
+#+begin_src cpp
+  template<typenameF, typename Func = std::decay_t<F>>
+
+  struct ScopeGuard {
+    // we want perfect forwarding but f is r-value ref, not universal ref
+    ScopeGuard(F&& f) : func (std::forward<F>(f)) {};
+    Func func;
+    using FF = F;
+  };
+
+  template<typename G>
+  ScopeGuard(G&) -> ScopeGuard<G&>; // with this everything works
+
+  int main() {
+    auto lambda = [](){};
+    auto sg0 = ScopeGuard(lambda); // does not work
+    // first uses the deduction guide
+    static_assert(std::is_same_v<ScopeGuard<decltype(lambda)&>, decltype(sg0)>);
+    auto sg1 = ScopeGuard(std::move(lambda)); // does work
+    static_assert(std::is_same_v<ScopeGuard<decltype(lambda)>, decltype(sg1)>);
+    auto sg2 = ScopeGuard([](){}); // does work
+    static_assert(!std::is_reference_v<decltype(sg2)::FF>);
+  }
+
+#+end_src
+
+Why do we want perfect forwarding?
+Delay copy or move to the inner most place, we want to have this in one constructor
+
+#+begin_src cpp
+  template<typename F>
+  struct TobiasScopeGuard {
+    template<typename G>
+    TobiasScopeGuard(G&& f) : func(std::forward<G>(g)) {};
+
+    F func;
+  };
+
+  template<typename G>
+  TobiasScopeGuard(G&&) -> TobiasScopeGuard<>;
+
+  auto sg3 TobiasScopeGuard([](){}); // does not work right now
+#+end_src
+
+* Ranges
+
+#+begin_src cpp
+  auto const ints = {0,1,2,3,4,5};
+  auto even = [](int i){ return 0 == i% 2; };
+  auto square = [](int i){ return i * i; };
+
+  // pipe syntax
+  for (int i: ints | std::views::filter(even) | std::views::transform(square)) {
+    std::cout << i << ' ';
+  }
+
+  // functional syntax
+  for (int i: std::views::transform(std::views::filter(ints, even), square)) {
+  // or std::views::filter(event)(ints)
+    std::cout << i << ' ';
+  }
+#+end_src
+
+** A range as a begin and an end
+
+** A view is a special range with requirements (by contract)
+- constant time move-constructable
+- If copyable, constant time copyable
+Basically a std::string_view for ranges (it is allowed to own data but that should not be expected)
+** Range adaptor gets a viewable_range and returns a view
+~views::filter~, ~views::take~, ~views::drop~, ~views::all~, ...
+With viewable range R and range adaptor closure object C (D), ~R | C~ and ~C(R)~ are equivalent
+
+Will not save any space, if you reevaluate, computation will be done again
+
+* Concepts
+** Usage
+#+begin_src cpp
+  template<Hashable T>
+  void f(T) {}
+
+  // or
+
+  template<typename T>
+    requires Hashable<T>
+  void f(T) {}
+
+  // or
+
+  void f(Hashable auto) {}
+
+  // or
+
+  template<typename T>
+  void f(T) requires Hashable<T> {}
+#+end_src
+
+** Definition
+#+begin_src cpp
+  
+#+end_src
+
+* Templates
+
+** When exhaustive instantiation is possible
+Declaration: hpp 
+Definition and Instantiation: cpp 
+
+*** If Definition is needed in another file (if template is used from another file)
+Definition: tpp
+Instantiation: cpp, include tpp
+
+** When exhaustive instantiation is not possible
+Declaration and Definition: hpp
+
+*** To still have a separate file for the definitions
+Declaration: hpp, include inl at the end of file
+Definition: inl
+
+* Value categories
+
+are properties of expressions, not fully reflected in type system
+expression has type and value category
+e.g. l(ocation)value and r(eadable)value
+
+x(piring)value: objects marked with std::move

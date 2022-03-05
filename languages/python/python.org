@@ -1,0 +1,15 @@
+#+TITLE:Python
+
+Install a package
+#+begin_src shell
+
+ python -m pip install <package> 
+
+#+end_src
+
+Install packages from file
+#+begin_src shell
+
+  python -m pip install -r requirements.txt 
+
+#+end_src

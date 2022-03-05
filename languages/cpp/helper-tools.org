@@ -1,0 +1,16 @@
+#+TITLE: Helper Tools for C++
+
+* include-what-you-use
+
+Install via apt, make sure to have suitable versions for llvm, libclang and clang (check iwyu github)
+#+begin_src shell
+  iwyu_tool <dir or file to check> -p <compilation database path> > /tmp/iwyu.out
+#+end_src
+
+<compilation database path>: where compile_commands.json is in (in build directory)
+
+** Fix
+#+begin_src shell
+  fix_includes < /tmp/iwyu.out
+#+end_src
+

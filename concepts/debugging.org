@@ -14,11 +14,43 @@ Debugger
 
 Get help with =help <command>=
 
-| r                            | Run to next breakpoint or to end                   |
-| br                           | Print backtrace of all stack frames                |
-| catch <breakpoint>           | Define a catchpoint (e.g. 'catch syscall connect') |
-| info threads                 | Show what threads are doing                        |
-| thread apply all backtrace 2 | Get one more stackframe fo all threads             |
+| r                              | Run to next breakpoint or to end                         |
+| c                              | Continue                                                 |
+| bt                             | Print backtrace of all stack frames                      |
+| catch <breakpoint>             | Define a catchpoint (e.g. 'catch syscall connect')       |
+| info threads                   | Show what threads are doing                              |
+| thread apply all backtrace 2   | Get one more stackframe fo all threads                   |
+| b <functionname> if id == <id> | Set breakpoint where function is called in threadnr <id> |
+| next                           | go to next command                                       |
+| step                           | go to next command, if functioncall: step into           |
+| print <expression>             | print expression                                        |
+
+** rr
+Record
+#+begin_src shell
+  rr record <executable>
+#+end_src
+| -e1 | very eagerly context-switch threads: every thread can only run one event |
+| -c4 | thread has time slice of 4 units                                         |
+
+Debug opens gdb
+#+begin_src shell
+  rr replay
+#+end_src
+| -p <pid>     | start at this process                                                         |
+| -g <eventid> | start at this event (when restarting use r 1 to start from first event)     |
+Recordings are saved in ~/.local/share/rr
+
+Show all processes of run
+#+begin_src shell
+  rr ps [<trace-dir>]
+#+end_src
+Shows process command with PID and event number (PPID)
+
+Show all records
+#+begin_src shell
+  rr ls
+#+end_src
 
 * strace
 Runs the specified command and records the system calls which are called and signals that are received (show in stderr)
@@ -61,3 +93,16 @@ Don't show stdout of command
   
 #+end_src
 
+* coredump
+#+begin_src shell
+  ulimit -a // see all
+  ulimit -c unlimited // set core file size to unlimited
+#+end_src
+#+begin_src shell
+  apt install systemd-coredump
+#+end_src
+#+begin_src shell
+  coredumpctl list
+  coredumpctl debug <name>
+#+end_src
+Then =bt= to show backtrace.

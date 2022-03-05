@@ -12,3 +12,20 @@
 | -A<format> | display byte offsets, x, o, d or n(one)                       |
 | -j <N>     | Skip initial N bytes                                          |
 | -t<format> | define format: <type>[<bytes per baseunit like float or int>] |
+
+* Write binary data to a file
+#+begin_src shell
+  echo -n -e '\x01\x02\xff' > <file>
+#+end_src
+Writes bytes 1 2 255
+
+* Conversion int <-> hex
+int -> hex
+#+begin_src shell
+  printf '%x\n' 255  // ff
+#+end_src
+
+hex -> int
+#+begin_src shell
+  printf "%d\n" 0xFF  // 255
+#+end_src

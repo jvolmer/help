@@ -1,0 +1,2 @@
+sudo apt install imagemagick
+sudo import -window root ~/pic.png

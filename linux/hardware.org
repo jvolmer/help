@@ -10,6 +10,12 @@ Get RAM size
  free 
 #+end_src
 
+
+Show disk space
+#+begin_src shell
+  df
+#+end_src
+
 Show processor infos
 #+begin_src shell
   lscpu
@@ -68,3 +74,14 @@ Write to drive
   sudo dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd<?>)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>]
 #+end_src
 
+** Monitors
+
+Show all monitors
+#+begin_src shell
+  xrandr
+#+end_src
+
+Set output: eDP-1 top left of HDMI-1
+#+begin_src shell
+  xrandr --output eDP-1 --left-of HDMI-1 --size 1600x900 --pos 0x0 --output HDMI-1 --size 2560x1440 --right-of eDP-1 --pos 1600x0
+#+end_src

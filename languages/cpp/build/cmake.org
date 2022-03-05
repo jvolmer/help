@@ -37,6 +37,14 @@ From the root (not build dir)
   cmake --build build --target <TARGET> # equivalent to make <TARGET>
 #+end_src
 
+** Properties
+Use with cmake <source-dir> -D<property>
+
+| CMAKE_EXPORT_COMPILE_COMMANDS=1 | generate compile_commands.json (needed for lsp) |
+| CMAKE_VERBOSE_MAKEFILE=On       | show commands when building                     |
+|                                 | (use VERBOSE=1) for a single make               |
+| CMAKE_BUILD_TYPE=Debug          | no optimization and with debug symbols          |
+
 * Links
 
 # resources

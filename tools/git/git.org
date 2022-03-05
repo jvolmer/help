@@ -88,6 +88,7 @@ Revision Selection
 | --graph                  | show branching graph                           |
 | --name-status            | see which files have changed how               |
 | /<search>                | search for <search>                            |
+| -- <filepath>            | show all commits involving given file          |
 
 ** Commit details
 Show more infomation about commit [for a specific <file>]
@@ -253,7 +254,7 @@ Add <commit> to current branch
 
 Show branches with date of last commit, sorted by this date
 #+begin_src shell
-  git for-each-ref --sort=committerdate refs/heads/ --format='%(objectname) %(commiterdate) %(refname:short)'
+  git for-each-ref --sort=committerdate refs/heads/ --format='%(objectname) %(committerdate) %(refname:short)'
 #+end_src
 
 Delete all local branches except develop
@@ -327,3 +328,14 @@ GPG-signed tag can be created with -s or -u <keyid> instead of -a
 #+begin_src shell
   git apply mypatch.patch
 #+end_src
+
+* Submodules
+
+#+begin_src shell
+  git submodule <command>
+#+end_src
+
+Commands
+| status | Show submodules and their status |
+| init   | Register uninitialized modules   |
+| update | Clone non-existent modules       |

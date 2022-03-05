@@ -17,6 +17,12 @@ Do both: save output of executable in file and show it on screen
 
 Suppress errors: Add =2>&-= at end of command
 
+Write both stderr and stdout to file (write stdout to file and redirect stderr to stdout)
+#+begin_src shell
+  command &> file // OR
+  command > file 2>&1
+#+end_src
+
 * Bash
 
 Check if file exists
