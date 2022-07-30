@@ -35,6 +35,9 @@ Unset variable
 | merge.conflictstyle | diff3     | show conflicts with base-branch content                      |
 |                     |           | < rebase branch ¦ base = this branch >                       |
 | fetch.prune         | true      | remove stale remote trackings when fetching                  |
+| pull.rebase         | treu      | rebase when pulling instead of merging                       |
+| core.excludefile    | <file>    | define global excludes in this file                          |
+| push.followTags     | true      | push tags when pushing                                       |
 
 ** Ignore
 Files in repository locally: ~.git/info/exclude~
@@ -233,7 +236,8 @@ Rewrite history: Reset current branch to <otherbranch> and reapply all commits m
   git rebase <otherbranch/commit>
 #+end_src
 
-| -i | interactively |
+| -i                 | interactively                     |
+| --exec '<command>' | execute command after each commit |
 
 ** Compare
 
@@ -339,3 +343,18 @@ Commands
 | status | Show submodules and their status |
 | init   | Register uninitialized modules   |
 | update | Clone non-existent modules       |
+
+* Bug search
+
+Find your first bad commit with a binary search on your commits.
+
+#+begin_src shell
+  git bisect <command>
+#+end_src
+
+| start         | start bisecting                                     |
+| bad <commit>  | define commit as bad (default commit: current one)  |
+| good <commit> | define commit as good (default commit: current one) |
+| reset         | finish bisecting                                    |
+
+After defining at least one good at one bad commit, git checks out a commit in the middle between bad and good. Then you can run whatever test to check whether this commit is bad or good, define it so and git will continue bisecting until it finds the first bad commit.

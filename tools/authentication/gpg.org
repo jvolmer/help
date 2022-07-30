@@ -1,0 +1,30 @@
+#+TITLE:GPG
+
+Implementation of the OpenPGP standard
+
+* Generate a key
+#+begin_src shell
+  gpg --full-generate-key
+#+end_src
+
+* List keys
+List keys for which you have both a public and a private key
+#+begin_src shell
+  gpg --list-secret-keys --keyid-format=long
+#+end_src
+Additionally shows the long form of the key id which is the last 64 bits (or 16 hex digits) of the fingerprint which is
+The key is identified by its shown fingerprint (or its long key id - last 64 bits or 16 hex digits, print separately via ~keyid-format=long~
+
+* Print public key
+in ASCII armor format
+#+begin_src shell
+  gpg --armor --export <keyid>
+#+end_src
+
+* Sign git commits
+#+begin_src shell
+  git config --global user.signingkey <keyid>
+  git config --global commit.pgpSign true
+  git config --global tag.pgpSign true
+#+end_src
+For GitHub to show a commit as verified, the Email address of the commit should be the same as the one included in the GPG key and verified on GitHub
