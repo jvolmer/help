@@ -26,7 +26,7 @@ From the root (not build dir)
 #+begin_src shell
   # generate build system
   cmake -S . -B build # -S <path-to-source> -B <path-to-build> [will be created if not exists]
-  # build
+  # setup build system
   cmake --build build # equivalent to make in build dir
   # with variables: -D<var>=<value>
   
@@ -34,11 +34,12 @@ From the root (not build dir)
   cmake --install build # equivalent to make install in build dir
                         # for CMake < 3.15 : cmake --build build --target install
   
+  # build
   cmake --build build --target <TARGET> # equivalent to make <TARGET>
 #+end_src
 
 ** Properties
-Use with cmake <source-dir> -D<property>
+Use with ~cmake <source-dir> -D<property>~
 
 | CMAKE_EXPORT_COMPILE_COMMANDS=1 | generate compile_commands.json (needed for lsp) |
 | CMAKE_VERBOSE_MAKEFILE=On       | show commands when building                     |

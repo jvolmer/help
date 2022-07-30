@@ -1,0 +1,28 @@
+#+TITLE:Regular Expressions
+
+* Typical
+** Characters
+| .      | any single character          |
+| [...]  | any one character in brackets |
+| [a-z]  | any one letter                |
+| [0-9]  | any one digit                 |
+| [^...] | not proceeding characters   |
+
+** Frequency
+| {min, max} | repeat preceeding instance at least min-times and at most max-times |
+
+Group characters with (...) to apply frequency to a full group
+
+*** Shorts:
+| {n} | {n, n} |
+| \*  | {0,}   |
+| +   | {1,}   |
+| ?   | {0,1}  |
+
+** Boundary conditions
+| \^ | beginning of pattern |
+| \$ | end of pattern       |
+
+* Shell Wildcards
+| \* | anything except . at start |
+| ?  | one single character       |

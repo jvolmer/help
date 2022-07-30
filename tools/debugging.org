@@ -65,8 +65,6 @@ Options:
 =-e '<name>'= Only show system calls with that system call name
 =-f= show children processes (other than main process)
 
-* htop
-
 * Rust
 
 Show info logs for everything, but for specific packages show debug logs
@@ -84,6 +82,7 @@ Get type of something, e.g. to print it out
   }
   
 #+end_src
+
 * General
 
 Don't show stdout of command

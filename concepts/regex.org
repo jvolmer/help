@@ -1,8 +1,0 @@
-| .       | any single character                |
-| [<...>] | any one character in brackets       |
-| [a-z]   | any one letter                      |
-| [0-9]   | any one digit                       |
-| \*      | zero or more instances preceeding * |
-| \^      | beginning of pattern                |
-| \$      | end of pattern                      |
-| {n}     | repeat instance preeding it n times |

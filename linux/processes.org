@@ -1,19 +1,60 @@
 * Process management
 
-Kill commands by name
+** Show
 #+begin_src shell
-  pkill <name>
-  killall <name>
+  ps 
 #+end_src
+| a | all users                                            |
+| u | show usernames                                       |
+| x | show processes which are not connected to a terminal |
 
 Get process ids for search term
 #+begin_src shell
   pgrep <term>
 #+end_src
 
-Show all processes
+** Kill
+*** By id
 #+begin_src shell
-  ps -A | less
+  kill <process-id>
+#+end_src
+| -<signalnumber/name> | send signal to process |
+
+Signals
+| SIGKILL |  9 | stop process immediately    |
+| SIGTERM | 15 | terminate process (default) |
+checkout signals with =man 7 signal=
+
+*** By name
+#+begin_src shell
+  pkill <name>
+  killall <name>
+#+end_src
+
+** Background / Foreground
+
+*** Start program in background
+#+begin_src shell
+  <program> &
+#+end_src
+
+*** Pause a program and bring it to background
+=C-z=
+
+*** Start a stopped program in the background
+#+begin_src shell
+  bg %<job-number>
+#+end_src
+Need only =bg= if you just paused a program with =C-z=
+
+*** Bring program to foreground
+#+begin_src shell
+  fg %<job-number>
+#+end_src
+
+*** Show all programs running in background
+#+begin_src shell
+  jobs
 #+end_src
 
 * Services

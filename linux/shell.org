@@ -10,12 +10,48 @@ Reload settings of file
   source <file>
 #+end_src
 
+** In and Output
+| Channel | Descriptor | Default  |
+|---------+------------+----------|
+| STDIN   |          1 | Keyboard |
+| STDOUT  |          2 | Monitor  |
+| STDERR  |          3 | Monitor  |
+
+*** Deflection of channels
+| CMD < FILE       | Take STDIN from FILE             |
+| CMD 0< FILE      |                                  |
+| CMD > FILE       | Write STDOUT to FILE             |
+| CMD 1> FILE      |                                  |
+| CMD 2> FILE      | Write STDERR to FILE             |
+| CMD >> FILE      | Append STDOUT to FILE            |
+| CMD 2>> FILE     | Append STDERR to FILE            |
+| CMD1 PIPE CMD2   | Pipe STDOUT from CMD1 to CMD2    |
+| CMD >& FILE      | Write STDOUT and STDERR to FILE  |
+| CMD > FILE 2>&1  |                                  |
+| CMD >> FILE 2>&1 | Append STDOUT and STDERR to FILE |
+
 Do both: save output of executable in file and show it on screen
 #+begin_src shell
-  <executable> 2>&1 | tee <file>
+  CMD 2>&1 | tee FILE
 #+end_src
 
-Suppress errors: Add =2>&-= at end of command
+*** Suppress
+| CMD 2>&-        | Suppress STDERR |
+| CMD > /dev/null | Suppress STDOUT |
+
+** Keybindings
+*** Navigation
+| C-a | start of line      |
+| C-e | end of line        |
+| M-b | one word backwards |
+| M-f | one word forwards  |
+*** Actions
+| C-k | delete from cursor until end of line |
+| C-y | undo last deletion                   |
+*** Copy and paste
+| C-S-c | copy selection to clipboard (marked by mouse) |
+| C-S-v | paste clipboard to shell                      |
+| S-Ins |                                               |
 
 Write both stderr and stdout to file (write stdout to file and redirect stderr to stdout)
 #+begin_src shell
@@ -75,10 +111,3 @@ At start of file define which command to execute. Will give filename to this com
   #!<command>
 #+end_src
 
-*** Copy and paste
-Copy from shell to clipboard selection (has to be marked by mouse)
-C-S-c
-
-Paste clipboard selection to shell
-C-S-v
-S-Insert

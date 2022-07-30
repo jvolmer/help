@@ -15,6 +15,8 @@ Options
 | -A N | Show N lines before           |
 | -B N | Show N lines after            |
 | -C N | Show N lines before and after |
+| -i   | ignore upper- and lower cases |
+| -H   | show filename for each line   |
 
 Search in a lot of files
 #+begin_src shell

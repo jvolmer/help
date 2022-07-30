@@ -1,0 +1,11 @@
+#+TITLE: Help
+
+#+begin_src shell
+  man <command>
+#+end_src
+
+Find proper commands
+#+begin_src shell
+  apropos <searchterm>
+  man -k <searchterm>
+#+end_src
