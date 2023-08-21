@@ -51,29 +51,61 @@ Enable device that is blocked
 #+end_src
 
 ** Drives
-List devices
+Check name of USB drive
+#+begin_src shell
+  ls -l /dev/disk/by-id/usb-*
+#+end_src
+
+List devices with their file systems
 #+begin_src shell
   lsblk [-f] # OR
-  sudo blkid
+  blkid
 #+end_src
 =-f= gives device name
 
 Get more detailed information
 #+begin_src shell
-  sudo fdisk -l
+  fdisk -l
 #+end_src
 
-Mount device
+Mount device to a directory (mountpoint) to make content of device visible
 #+begin_src shell
-  sudo mount /dev/sd<?> <mountpoint>
+  mount <device, e.g. /dev/sd<?>> <mountpoint>
 #+end_src
-
-Write to drive
+Assignment of device to directory can be given in =/etc/fstab=, then only one of them has to be given
 #+begin_src shell
-  sudo umount <device via /dev/sd<?><?> or name>
-  sudo dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd<?>)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>]
+  systemd-mount <device>
+#+end_src
+Mounts to =/run/media/system/<device_identifier>= as default
+
+Find mounted devices
+#+begin_src shell
+  findmnt
 #+end_src
 
+Unmount
+#+begin_src shell
+  umount <device or mountpoint>
+#+end_src
+
+Write to drive (device must be unmounted)
+#+begin_src shell
+  dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd<?>)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>] #OR
+  cp <iso-file> <path to usb>
+#+end_src
+
+Formatting with ext4 file system (device must be unmounted)
+#+begin_src shell
+  mkfs -t ext4 <device> # OR
+  mkfs.ext4 <device>
+#+end_src
+
+Resore USB drive
+#+begin_src shell
+  wipefs --all /dev/sd<?> # remove filesystem signature
+  # partitioning
+  # reformatting
+#+end_src
 ** Monitors
 
 Show all monitors

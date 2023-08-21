@@ -48,6 +48,7 @@ Show quota of all files in this directory and all subdirectories
 | -h                  | Human readable format (kB and MB instead of just bytes) |
 | -s                  | Sum                                                     |
 | -s <pattern>        | Sum patterns, e.g. */ gives only dir in this dir        |
+|                     | or .[^.]*/ for all hidden dirs                          |
 | --exclude=<pattern> | Exclude files                                           |
 
 ** Permissions
