@@ -100,8 +100,10 @@ Don't show stdout of command
 #+begin_src shell
   apt install systemd-coredump
 #+end_src
+Possibly do =sudo systemctl enable apport.service=, have to use =sudo= for =coredumpctl=
 #+begin_src shell
   coredumpctl list
   coredumpctl debug <name>
+  coredumpctl gdb // exectues gdb on last entry
 #+end_src
 Then =bt= to show backtrace.

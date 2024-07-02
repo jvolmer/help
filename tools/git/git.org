@@ -92,6 +92,7 @@ Revision Selection
 | --name-status            | see which files have changed how               |
 | /<search>                | search for <search>                            |
 | -- <filepath>            | show all commits involving given file          |
+| --first-parent           | show only your commits after a merge           |
 
 ** Commit details
 Show more infomation about commit [for a specific <file>]
@@ -326,6 +327,11 @@ GPG-signed tag can be created with -s or -u <keyid> instead of -a
 ** Create
 #+begin_src shell
   git diff tag1..tag2 > mypatch.patch
+#+end_src
+
+From staging area
+#+begin_src shell
+  git diff --cached > mypatch.patch
 #+end_src
 
 ** Apply

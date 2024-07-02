@@ -99,10 +99,14 @@ Beispiel: tag LoesungAufgabe1 im infrastrucure-workshop Projekt
 ** Build image
 
 #+begin_src shell
-  
+
   docker build . -t <name>
-  
+
+  # use non-standard dockerfile location
+  docker build -f <path-to-dockerfile, e.g. build/deploy.docker> .
 #+end_src
+
+
 
 * Run Image
 
