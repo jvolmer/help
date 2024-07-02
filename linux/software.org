@@ -1,8 +1,15 @@
 #+TITLE: Software
 
-* Linux version
+* Ubuntu
 #+begin_src shell
   lsb_release -a
+#+end_src
+
+** Upgrade to new version
+Update and upgrade everything
+Backup
+#+begin_src shell
+  sudo do-release-upgrade
 #+end_src
 
 * Installing software with apt
