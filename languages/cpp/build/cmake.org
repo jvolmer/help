@@ -38,6 +38,14 @@ From the root (not build dir)
   cmake --build build --target <TARGET> # equivalent to make <TARGET>
 #+end_src
 
+** Presets
+#+begin_src shell
+  # Configure
+  cmake --preset <name>
+  # Build (preset has to be given at end)
+  cmake --build --parallel 8 --preset <name>
+#+end_src
+
 ** Properties
 Use with ~cmake <source-dir> -D<property>~
 
