@@ -56,3 +56,15 @@ that is received on <port>
 #+begin_src shell
   dig <hostname>
 #+end_src
+
+* Network manager
+
+Make sure radio is on
+#+begin_src shell
+  nmcli r wifi on
+#+end_src
+
+List available networks
+#+begin_src shell
+  nmcli d wifi list
+#+end_src

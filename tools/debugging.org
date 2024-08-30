@@ -5,9 +5,7 @@ Debugger
 
 ** Run
 #+begin_src shell
-  
   gdb --quiet --args <executable>
-  
 #+end_src
 
 ** Commands inside
@@ -23,8 +21,14 @@ Get help with =help <command>=
 | b <functionname> if id == <id> | Set breakpoint where function is called in threadnr <id> |
 | next                           | go to next command                                       |
 | step                           | go to next command, if functioncall: step into           |
-| print <expression>             | print expression                                        |
+| print <expression>             | print expression                                         |
+| thread <id>                    | switch to thread <id>                                    |
 
+** Attach to running process
+
+#+begin_src shell
+  (sudo) gdb -p <pid (e.g. via ps aux)>
+#+end_src
 ** rr
 Record
 #+begin_src shell
@@ -37,8 +41,8 @@ Debug opens gdb
 #+begin_src shell
   rr replay
 #+end_src
-| -p <pid>     | start at this process                                                         |
-| -g <eventid> | start at this event (when restarting use r 1 to start from first event)     |
+| -p <pid>     | start at this process                                                   |
+| -g <eventid> | start at this event (when restarting use r 1 to start from first event) |
 Recordings are saved in ~/.local/share/rr
 
 Show all processes of run
