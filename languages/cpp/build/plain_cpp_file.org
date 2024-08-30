@@ -1,0 +1,16 @@
+Compile and create compile_commands.json file:
+#+begin_src shell
+  bear -- clang++ -std=c++20 -O3 -o generator <cpp-file> 
+#+end_src
+
+Check for memory leaks:
+#+begin_src shell
+  -fsanitize=address
+#+end_src
+
+Compile with different standard library:
+#+begin_src shell
+  -stdlib=libc++
+#+end_src
+clang is bundled with libc++ (but can possibly use libstdc++ on unix systems by default)
+gcc is bundled with libstdc++

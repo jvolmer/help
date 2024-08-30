@@ -1,0 +1,42 @@
+#+TITLE: Coroutines
+
+A coroutine needs a promise_type
+#+begin_src cpp
+  struct promise_type_basis {
+    auto get_return_object() noexcept // creates coroutine object, returns coroutine
+    auto initial_suspend() noexcept; // called after creating coroutine, e.g. decide wether it is lazy (return std::suspend_always) or eager (return std::suspend_never)
+    auto final_suspend() noexcept; // called before deleting coroutine
+    void unhandled_exception() noexcept; // called whenever there is an excpetion happening inside coroutine body
+  }
+
+  template <typename T>
+  struct promise_type: promise_type_basis {
+    auto yield_value(T v) noexcept; // defines co_yield behaviour
+    auto return_value(T v) noexcept; // defines co_return behaviour if return is non-void
+    auto return_void() noexcept; // defines co_return behaviour if return is void
+    auto operator co_await() && { // defines co_await behaviour
+      struct awaitable {
+        bool await_ready() noexcept; // called after calling co_await, 
+          // if returns true: calls await_resume()
+          // if returns false: calls await_suspend()
+
+        bool await_suspend(std::coroutine_handle<> c) noexcept; // defines activity, handle can be used to resume coroutine when activity finished (call c.resume())
+        T await_resume(); // when a suspended coroutine is resumed, await_resume is called
+      }
+      return awaitable;
+    }
+  }
+#+end_src
+
+#+begin_src cpp
+  std::coroutine_handle //refers to suspended or executing coroutine
+     .resume() // resumes coroutine
+#+end_src
+
+If coroutine is eager:
+#+begin_src cpp
+  auto f1 = baz("1"); // starts already baz-call
+  auto f2 = baz("2"); // starts already baz-call
+  co_await f1; // check that f1 is finished
+  co_await f2; // check that f2 is finished
+#+end_src

@@ -1,0 +1,47 @@
+#+TITLE: C++ Memory Model
+
+* Memory model
+Each thread has its own memory where variables can be cached before writing them to the shared memory. Therefore threads have different views of variables and execution orders. The compiler can reorder stuff as well to improve performance.
+
+* Memory Orders (ordered by strict to weak)
+
+only order surrounding operations
+
+** memory_order_seq_cst
+the atomic operation acts as an optimization barrier: Its ok to re-order things between atomic operations, but not accross the operations.
+'Happens-before' restriction for atomic operations: all atomic operations are ordered for each thread in the same way (order is determined at runtime)
+** memory_order_acq_rel
+** memory_order_release
+only for write operations
+prevents ordinary loads and stores from being reordered after the atomic operation, but stay before
+can think of a lock that is released
+** memory_order_aquire (same level as release)
+only for read operations
+prevents ordinary loads and stores from being reorders before the atomic operation, but stay after
+can think of a lock that is acquired
+** memory_order_consume
+only for read operations
+should not be used (all compilers use aquire instead)
+** memory_order_relaxed
+no thread can count on a specific ordering from another thread
+only ordering imposed: once a value for a variable from thread 1 is observed in thread 2, thread 2 cannot see an earlier value for that variable from thread 1.
+
+Usage: For a variable that is atomic in nature rather than using it to synchronize threads for other shared memory data
+
+* Atomic operations
+all default to memory_order_seq_cst (including operators)
+
+** compare_exchange_weak
+can fail spuriously
+rule of thumb: if applied in a loop, use weak version, otherwise use strong version
+two memory orders:
+- success case (read modify write)
+- failure case (reload)
+
+* Modification order
+- memory operations performed by the same thread on the same memory location are not reordered with respect to the modification order
+- once a value for a variable from thread 1 is observed in thread 2, thread 2 can not see an earlier value for that variable from thread 1
+- read-modify-write operations always return latest value
+
+* Resources
+[[https://www.youtube.com/watch?v=A8eCGOqgvH4][Herb Sutter: atomic<> Weapons]]
