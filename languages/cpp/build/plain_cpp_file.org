@@ -1,0 +1,9 @@
+Compile and create compile_commands.json file:
+#+begin_src shell
+  bear -- clang++ -std=c++20 -O3 -o generator <cpp-file> 
+#+end_src
+
+Check for memory leaks:
+#+begin_src shell
+  -fsanitize=address
+#+end_src
