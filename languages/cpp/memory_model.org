@@ -1,5 +1,86 @@
 #+TITLE: C++ Memory Model
 
+ Several threads access shared memory concurrently
+ Memory is much slower than CPU instructions: therefore we have memory caches
+
+ Improvements:
+ - Compiler optimizations
+ - processor OoO execution
+ - cache coherence (L0, L1, L2 caches, store buffer: for writes  because writes are more expensive than reads; gets asynchronously flushed to memory)
+
+** Sequential consistency
+defined by Leslie Lamport in 1979
+the result of any execution is the same as if the reads and writes occured in some order, and the operations of each individual processor appear in this sequence in the order specified by its program
+but: chip & compilers can do a lot of optimizations (program could run (much) faster)
+
+** Transformations between source code and actual execution
+all can do reordering of memory reads and writes
+- Compiler
+subexpr elimination, register allocation, STM, ...
+- processor
+prefetch, speculation, overlap writes, HTM, ...
+- cache
+store buffers, private shared caches, ...
+
+transformations at all levels are equivalent, we can reason about all transformations as reorderings of source code loads and stores
+   
+we only care about execution order equivalent to some sequentially consistent innterleaved execution of memory ops for each thread
+including that each write appears to be atomic and globally visible simultaneously to all processors
+
+** Source code reordering
+show Dekker algorithm
+very easy archictecture: processor with a store buffer (just reordering via cache)
+
+Show some optimizations a compiler would do
+compiler knows all memory operations in this thread and exactly what they do, including data dependencies
+does not know which memory locations are mutable shared variables and could change asynchronously due to memory operations in another thread - this is why we need mutexes / atomics / ... - to tell compiler about mutable shared locations
+
+** memory model
+software memory models have converged on sequenctial consistency for data-race free programs; you get the illusion of a sequential consistency as long as you don't write a race
+is default in C++
+memory model is a contract: you promise the synchronize the program correctly (with no data races) and system promises to provide the illusion of execution the program you wrote (with sc)
+
+what do you see in debug build
+- use one variable for two variables
+datarace
+- partly constructed / destructed objects
+
+** transaction
+- atomic (all or nothing)
+- consistent: reads consistent state or transforms consistently
+- independent: independent of other transactions on same data
+
+via critial region
+- locks
+- atomics
+- transactional memory
+
+** aquire - release
+changing order e.g. with locks:
+move variables inside critical region, but not over / under it
+unlock: releases all actions taken by this thread so far, e.g. to use variable as flag in critical region
+lock: aquire all actions from other threads
+cannot move up across an aquire and not down across a release
+a release store makes its prior access visible to a thread performing an acquire load that sees (pairs with) that store
+therefore compiler cannot move an acquire below a release
+sc: additionally, compiler cannot move a relase below an acquire
+
+memory synchronization actively works against important modern hardware optimizations: do as little as possible
+concurrencly = bandwidth x latency
+only 1% of cpu computes anything, rest is for move / store data - don't get rid of any optimizations if possible
+
+** sc - transitivity / causality (to be able to reason about code)
+total order so that every thread agrees on who came first
+thread1: x= 1
+thread2: y=1
+thread3: if (x==1 && y ==0) print("x first")
+thread4: if (y==1 && x == 0) print("y first")
+
+if you use other memory order than sc: you still get
+- each individual read/write is atomic (no torn read, no locking needed)
+- each thread's read/writes are guaranteed to execute in order
+- special ops, e.g. CAS
+
 * Memory model
 Each thread has its own memory where variables can be cached before writing them to the shared memory. Therefore threads have different views of variables and execution orders. The compiler can reorder stuff as well to improve performance.
 

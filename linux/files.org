@@ -91,3 +91,7 @@ Create symbolic link for files or directories
   ln -sf <original> <yours>
 #+end_src
 
+** Watch a file
+#+begin_src shell
+  tail -f <file>
+#+end_src

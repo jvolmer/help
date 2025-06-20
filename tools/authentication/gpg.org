@@ -12,7 +12,7 @@ List keys for which you have both a public and a private key
 #+begin_src shell
   gpg --list-secret-keys --keyid-format=long
 #+end_src
-Additionally shows the long form of the key id which is the last 64 bits (or 16 hex digits) of the fingerprint which is
+Additionally shows the long form of the key id which is the last 64 bits (or 16 hex digits) of the fingerprint. ID is given in sec row after '/'
 The key is identified by its shown fingerprint (or its long key id - last 64 bits or 16 hex digits, print separately via ~keyid-format=long~
 
 * Print public key

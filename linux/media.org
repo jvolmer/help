@@ -21,3 +21,5 @@ Convert picture to grey colors
    input.pdf
 #+end_src
 
+** Screenshots
+use =spectacle=

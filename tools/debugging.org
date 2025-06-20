@@ -4,31 +4,64 @@
 Debugger
 
 ** Run
+Start new run
 #+begin_src shell
   gdb --quiet --args <executable>
+#+end_src
+
+Attach to running process
+#+begin_src shell
+  (sudo) gdb -p <pid (e.g. via ps aux)>
 #+end_src
 
 ** Commands inside
 
 Get help with =help <command>=
 
-| r                              | Run to next breakpoint or to end                         |
-| c                              | Continue                                                 |
-| bt                             | Print backtrace of all stack frames                      |
-| catch <breakpoint>             | Define a catchpoint (e.g. 'catch syscall connect')       |
-| info threads                   | Show what threads are doing                              |
-| thread apply all backtrace 2   | Get one more stackframe fo all threads                   |
-| b <functionname> if id == <id> | Set breakpoint where function is called in threadnr <id> |
-| next                           | go to next command                                       |
-| step                           | go to next command, if functioncall: step into           |
-| print <expression>             | print expression                                         |
-| thread <id>                    | switch to thread <id>                                    |
+| r                              | Run to next breakpoint or to end                                                                  |
+| r > <outfile>                  | run and redirect output to <outfile>                                                              |
+| c                              | Continue                                                                                          |
+| bt                             | Print backtrace of all stack frames                                                               |
+| catch <breakpoint>             | Define a catchpoint (e.g. 'catch syscall connect')                                                |
+| info threads                   | Show what threads are doing                                                                       |
+| thread apply all backtrace 2   | Get one more stackframe fo all threads                                                            |
+| b <functionname> if id == <id> | Set breakpoint where function is called                                                           |
+|                                | in threadnr <id>                                                                                  |
+| next                           | go to next command                                                                                |
+| step                           | go to next command, if functioncall: step into                                                    |
+| print <expression>             | print expression                                                                                  |
+| thread <id>                    | switch to thread <id>                                                                             |
+| rwatch *<mem-address>          | add hardware watchpoint                                                                           |
+| layout src                     | 2 windows: src and command (output corrupted: S-l (refresh)                                       |
+|                                | (switch window with C-x o), go to layout with C-x a                                               |
+| catch throw                    | create a catchpoint that will stop the execution of the program as soon as an exception is thrown |
+| up                             |                                                                                                   |
 
-** Attach to running process
+Breakpoint
+| b <filename (without path)>:<line> | set breakpoint                  |
+| info b                             | list breakpoints                |
+| del <breakpoint nr>                | delete breakpoint, nr from info |
 
+Debugging exceptions: https://robinmoussu.gitlab.io/blog/post/2018-12-02_gdb/
+
+Print a string without converting any non-printable characters into escape sequences
 #+begin_src shell
-  (sudo) gdb -p <pid (e.g. via ps aux)>
+  (gdb) printf "%s\n", (char *)variable
 #+end_src
+
+
+** Configuration
+Normally gdb auto-loads =~/.gdbinit= and =.gdbinit= in your current directory
+Running gdb as super user can prevent this (due to security reasons), then you can start gdb with
+#+begin_src shell
+  sudo gdb -q -iex "set auto-load safe-path <path>" <your execution file>
+#+end_src
+where the path directory includes the =.gdbinit= file you want to load
+Check if a local file is loaded (for some reason a loaded =~/.gdbinit= file is not shown here):
+#+begin_src shell
+  info auto-load
+#+end_src
+
 ** rr
 Record
 #+begin_src shell

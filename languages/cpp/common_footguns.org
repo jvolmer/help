@@ -1,0 +1,173 @@
+#+TITLE:Common Footguns
+
+* Captured =this= reference does not live anymore when lambda is executed
+error: e.g. datarace in tsan 
+#+begin_src cpp
+  // ...
+  auto handler = [this, asioSocket = std::move(asioSocket)](
+                     asio_ns::error_code const& ec) mutable {
+    if (ec) {
+      handleError(ec);
+      return;
+    }
+
+    // set the endpoint
+    ConnectionInfo info;
+    info.endpoint = _endpoint->specification();
+    info.endpointType = _endpoint->domainType();
+    info.encryptionType = _endpoint->encryption();
+    info.serverAddress = _endpoint->host();
+    info.serverPort = _endpoint->port();
+
+    info.clientAddress = asioSocket->peer.address().to_string();
+    info.clientPort = asioSocket->peer.port();
+
+    LOG_TOPIC("853aa", DEBUG, arangodb::Logger::COMMUNICATION)
+        << "accepted connection from " << info.clientAddress << ":"
+        << info.clientPort;
+
+    auto commTask = std::make_shared<HttpCommTask<SocketType::Tcp>>(
+        _server, std::move(info), std::move(asioSocket));
+    _server.registerTask(std::move(commTask));
+    this->asyncAccept();
+  };
+
+  // cppcheck-suppress accessMoved
+  _acceptor.async_accept(socket, peer, withLogContext(std::move(handler)));
+#+end_src
+
+Solution:
+#+begin_src cpp
+  auto handler = [self_ptr = weak_from_this(),
+                asioSocket = std::move(asioSocket)](
+                   asio_ns::error_code const& ec) mutable {
+    if (auto self = self_ptr.lock(); self != nullptr) {
+      //...
+    }
+  }
+#+end_src
+
+** the instance where =shared_from_this()= is called on needs to be a shared ptr in the first place
+error: =bad_weak_ptr()=
+
+best to make the constructor private and have a static method to create the shared ptr, e.g. via
+#+begin_src cpp
+  public:
+    static std::shared_ptr<AcceptorTcp> make(rest::GeneralServer& server,
+                                             rest::IoContext& ctx,
+                                             Endpoint* endpoint) {
+      struct MakeShared : AcceptorTcp {
+        MakeShared(rest::GeneralServer& server, rest::IoContext& ctx,
+                   Endpoint* endpoint)
+            : AcceptorTcp(server, ctx, endpoint) {}
+      };
+      return std::make_shared<MakeShared>(server, ctx, endpoint);
+    }
+  private:
+    AcceptorTcp(rest::GeneralServer& server, rest::IoContext& ctx,
+                Endpoint* endpoint);
+#+end_src
+
+** =std::enable_shared_from_this<T>()= has to be inherited publicly
+error: =bad_weak_ptr()=
+
+or the inheriting object needs to be a struct (which defaults to public access control, both for members and for base classes)
+
+* Non-closed namespace
+
+Error: some other things will not be defined, depending on what is included just after this given file 
+
+#+begin_src cpp bla.h
+
+  namespace my_namespace {
+
+    struct MyStruct {
+      // ...
+    };
+
+  // non-closed namespace
+
+#+end_src
+
+* No used namespace
+
+One cpp file defines a type in no namespace, another one defines a struct with the same name in no namespace
+TODO check if this gives some kind of compiler failure or does it just take a random one
+
+* Concepts and forward declaration
+
+#+begin_src cpp
+  #include <concepts>
+
+  template<typename T>
+  concept HasSnapshot = requires(T t) {
+      { t.snapshot() } -> std::convertible_to<typename T::Snapshot>;
+  };
+
+  template<HasSnapshot T>
+  struct List {
+      struct Node {
+          T a;
+      };
+      Node* node;
+  };
+
+  struct Task {
+      using Snapshot = int;
+      auto snapshot() -> Snapshot {return 1;}
+      List<Task>::Node* parent;     // error: constraints not satisfied for class template 'List' [with T = Task]
+                                    // note: because 'Task' does not satisfy 'HasSnapshot'
+                                    // note: because 't.snapshot()' would be invalid: member access into incomplete type 'Task'
+  }; 
+#+end_src
+
+can be solved with inheritance and ptr conversion:
+#+begin_src cpp
+  #include <concepts>
+  #include <memory>
+
+  template<typename T>
+  concept HasSnapshot = requires(T t) {
+      { t.snapshot() } -> std::convertible_to<typename T::Snapshot>;
+  };
+
+  struct NodeFwd;
+
+  template<HasSnapshot T>
+  struct List {
+      struct Node {
+          T a;
+      };
+      Node* node;
+  };
+
+  struct Task {
+      using Snapshot = int;
+      auto snapshot() -> Snapshot {return 1;}
+      Task() = default;
+      Task(NodeFwd* node) : parent{node} {}
+      NodeFwd* parent;
+  };
+
+  int main() {
+      auto node = std::make_unique<List<Task>::Node>(Task{});
+      auto task = Task{reinterpret_cast<NodeFwd*>(node.get())};
+#+end_src
+
+* Copy constructor / assignment is used when move constructor / assignment is not defined
+#+begin_src shell
+  error: call to implicitly-deleted copy constructor of ...
+#+end_src
+when both are deleted, but we actually would need the move constructor
+
+* Create thread local variable only once, only when calling a function
+#+begin_src cpp
+  auto get_variable() noexcept -> Variable& {
+    struct Guard {
+      Variable _variable;
+    };
+    static thread_local auto guard = Guard{};
+    return *guard._variable;
+  }
+
+#+end_src
