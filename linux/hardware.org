@@ -90,7 +90,7 @@ Unmount
 
 Write to drive (device must be unmounted)
 #+begin_src shell
-  dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd<?>)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>] #OR
+  dd if=<file to write (or /dev/zero)> of=<path to usb (/dev/sd<?>)> [bs=<blocksize of read and write, e.g. 4M for ext4 filesystem>] && sync #sync to make sure to return only when finished OR
   cp <iso-file> <path to usb>
 #+end_src
 
@@ -107,9 +107,21 @@ Resore USB drive
   # reformatting
 #+end_src
 
+*** Partition
 Create a partition
 #+begin_src shell
   sudo parted /dev/sda -a opt mkpart primary 2048s 4.5T
+#+end_src
+
+Or do it interactively
+#+begin_src shell
+  sudo parted /dev/sd<x>
+  print # visualize current state
+  mklabel gpt # create data structure for partition table
+  mkpart "partition name" <file-system> <start> <end>
+  # file-system e.g. ext4
+  # start e.g. 0%
+  # end e.g. 10GiB or -1s until end
 #+end_src
 ** Monitors
 

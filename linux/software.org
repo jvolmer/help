@@ -143,5 +143,10 @@ Remove all alternatives
   
 #+end_src
 
+** Get list of all available options to set
+#+begin_src shell
+  update-alternatives --get-selections
+#+end_src
+
 * Kernels
 Removing old kernels: https://help.ubuntu.com/community/RemoveOldKernels#Manual_Maintenance
