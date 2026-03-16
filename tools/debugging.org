@@ -134,6 +134,8 @@ Don't show stdout of command
   ulimit -a // see all
   ulimit -c unlimited // set core file size to unlimited
 #+end_src
+updated when logging in
+
 #+begin_src shell
   apt install systemd-coredump
 #+end_src

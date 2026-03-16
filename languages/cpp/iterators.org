@@ -1,0 +1,23 @@
+#+TITLE:Iterators
+
+#+begin_src cpp
+struct Struct {
+  struct iterator {
+
+    value_type const &operator*() const; // get value
+
+    iterator &operator++(); // go to next value
+
+    // iterator operator++(int); // not required
+
+    // bool operator==(const iterator &other) const; // not required
+
+    bool operator!=(const iterator &other) const; // required for value iteration
+  };
+
+  iterator begin() const { return iterator{}; }
+  iterator end() const { return iterator{}; } // required for value iteration; create it differently such that end can be seen
+};
+
+
+#+end_src

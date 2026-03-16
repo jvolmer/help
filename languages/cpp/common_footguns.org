@@ -171,3 +171,12 @@ when both are deleted, but we actually would need the move constructor
   }
 
 #+end_src
+
+* Iterators are just pointers and dont have anything to do with the thing they iterate over
+#+begin_src cpp
+std::vector<std::string> vertices;
+std::vector<std::string>::iterator nextVertex;
+#+end_src
+
+If I now set ~nextVertex~ not to ~vertices.begin()~ but to something different that goes out of scope, doing ~*nextVertex~ is undefined and will probably give me a segfault
+In gdb you can possibly see in the backtrace at some point where this happens: ~nextVertex=<error: Cannot access memory at address 0x7063742b70747468>~

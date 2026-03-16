@@ -17,6 +17,7 @@ Transfer data from url
 | -d '{...}'   | Add data in http POST request                     |
 | -O           | Write output to local file                        |
 | -L           | Redo if page has been moved to different location |
+| -s           | Silent, doesn't show progress bar                 |
 
 Send mail
 #+begin_src shell
