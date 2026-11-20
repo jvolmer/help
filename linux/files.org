@@ -4,6 +4,9 @@
 #+begin_src shell
   find <path> -name <name/regex>
 #+end_src
+Command-line-options
+| -mindepth <N> | Minimal depth of directory-traversal (starts with 1 at given root) |
+| -maxdepth <N> | Maximal depth                                                      |
 
 Delete files
 #+begin_src shell

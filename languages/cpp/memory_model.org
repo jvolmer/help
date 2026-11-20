@@ -126,3 +126,8 @@ two memory orders:
 
 * Resources
 [[https://www.youtube.com/watch?v=A8eCGOqgvH4][Herb Sutter: atomic<> Weapons]]
+
+* relaxed vs release-acquire
+Acquire adds exactly one thing: if the value you read was written by a release operation, then everything the writer did
+  before that release becomes visible to the reads you perform after the acquire. So the question to ask is always the same: after this load, do I read other memory whose validity depends on work the writer
+  did before setting the flag?

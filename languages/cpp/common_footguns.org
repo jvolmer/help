@@ -73,6 +73,19 @@ error: =bad_weak_ptr()=
 
 or the inheriting object needs to be a struct (which defaults to public access control, both for members and for base classes)
 
+* Capturing and resetting the same variable we return
+
+#+begin_src cpp
+Result res = basics::catchToResult([&]() { 
+  // ...
+  res = ...;
+  // ...
+  return res;
+});
+#+end_src
+we reuse the captured variable (which is not fully constructed when reusing it) and when returning it it is not eligible to named return value optimization, therefore the Results copy constructor is invoked with ~this == &other~, creates a new unique ptr and writes that pointer into _error without destroying whatever was already there.
+Solution: Use a local variable for inner ~res~
+
 * Non-closed namespace
 
 Error: some other things will not be defined, depending on what is included just after this given file 

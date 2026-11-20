@@ -1,0 +1,14 @@
+#+TITLE:Performance measurements
+
+* Perf
+
+See which code parts take the longest time
+#+begin_src shell
+perf record -F 9999 -g <executable>
+#+end_src
+
+#+begin_src shell
+perf report
+#+end_src
+| +     | expand current line                                |
+| ENTER | open menu (e.g. show event only of current thread) |
